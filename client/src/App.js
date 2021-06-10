@@ -1,25 +1,25 @@
-import logo from './logo.svg';
+import MyNavbar from './components/MyNavbar.js'
+import MySurveysTable from './components/MySurveysTable.js'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+  return ( <>
+    <head>
+      <title>My Online Surveys</title>
+    </head>
+    <body>
+      <header>
+        <MyNavbar/>
+        <container>
+        <MySurveysTable></MySurveysTable>
+        </container>
       </header>
-    </div>
-  );
+    </body>
+
+
+    </>
+    );
 }
 
 export default App;
