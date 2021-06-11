@@ -10,12 +10,27 @@ surveyQuestions= the questions of this survey (questionId, surveyId, chiusa: 0/1
 */
 
 function FillInSurvey(props) {
-    const answers=[];
-    for (let i=0; i<props.surveyQuestion.length; i++)
-    {
-        const [answer, setAnswer] =useState();
-        answers.append({answer:answer, setAnswer:setAnswer});
+    var data = [];
+
+    for(var i = 0; i < props.surveyQuestions.length; i++) {
+        data.push("");
     }
+
+    const [answers, setAnswers] =useState([...data]);
+
+    const setAnswer = (answerIndex, answer) => 
+    {   console.log("risposta",answer, answerIndex)
+        let newAnswers = []
+        for(var i = 0; i < answers.length; i++) {
+            if (i===answerIndex)
+                newAnswers.push(answer);
+            else
+                newAnswers.push(answers[i]);
+        }
+        setAnswers(newAnswers);
+        console.log(answers)
+    }
+
     return (<>
         <Card>
 
@@ -46,7 +61,8 @@ function FillInSurvey(props) {
                                                                         return <OpenQuestion 
                                                                             surveyQuestion={sQ}
                                                                             key={sQ.questionId}
-                                                                            questionIndex={sQind} />
+                                                                            questionIndex={sQind} 
+                                                                            setAnswer={setAnswer}/>
                                                                 })}
 
                     </Form.Group>
@@ -73,8 +89,10 @@ function FillInSurvey(props) {
 
 /*Props passate da FillInSurvey:
 surveyQuestion= the questions of this survey (questionId, surveyId, chiusa: 1, min:num, max:num, obbligatoria:-1, question, answers: *separated by _*))
-*/
+setAnswer= function to set the answer of the question*/
 function ClosedQuestion(props) {
+
+
     /*if min,max= (0,1) or (1,1) radiobox because its a single answer question
     otherwise its checkbox because multiple answers can be selected */
     if ((props.surveyQuestion.min === 0 && props.surveyQuestion.max === 1) 
@@ -117,21 +135,33 @@ function ClosedQuestion(props) {
 
 /*Props passate da FillInSurvey.js:
 surveyQuestion= the questions of this survey (questionId, surveyId, chiusa: 0, min:-1, max:-1, obbligatoria:0/1, question, answers: ""))
-*/
+setAnswer= function to set the answer of the question*/
 function OpenQuestion(props) {
+    
+    const handleOpenQuestionChange = (event) =>
+    {  //TODO: check lunghezza
+       console.log(event.target.value);
+       props.setAnswer(props.questionIndex, event.target.value)
+    }
+    
 
     return <Form.Group controlId={"FillInSurvey.openQuestion" + props.surveyQuestion.questionId}>
                 {/** Question: */}
                 <Form.Label  >{props.questionIndex+1 + ") " + props.surveyQuestion.question}  </Form.Label>
                 {/** Free space to answer: */}
-                <Form.Control as="textarea" rows={3} />
+                <Form.Control as="textarea" rows={3} onChange={handleOpenQuestionChange} />
             </Form.Group>
 }
+
+
 
 function SubmitButton(props) {
     return <Button className="btn btn-success btn-lg ">
                 Submit your answers
            </Button>
 }
+
+
+
 
 export default FillInSurvey;
