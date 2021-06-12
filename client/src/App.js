@@ -21,14 +21,23 @@ const sQuestions= [{ questionId: 0, surveyId:0,  chiusa: 1, min:1, max:1, obblig
 { questionId: 3, surveyId:0, chiusa: 1, min:0, max:3, obbligatoria:-1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
 
 { questionId: 2, surveyId:0, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che cosa studi?", answers: "" },
-{ questionId: 0, surveyId:1, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" },
+{ questionId: 0, surveyId:1, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" }
 
 ];
+const sAnswers=[];
 
 
 function App() {
   const [surveysInfo, setSurveysInfo] =useState([...sInfo]);
   const [surveysQuestions, setSurveysQuestions] =useState([...sQuestions]);
+  const [surveysAnswers, setsurveysAnswers] =useState([...sAnswers]);
+
+  const addFilledInSurvey = (surveyId, answers, user) => {
+    console.log("addFilledInSurvey");
+    const FilledInSurvey = {surveyId: surveyId, answers: answers, user:user};
+    setsurveysAnswers([...surveysAnswers, FilledInSurvey]);
+
+  }
   
   return ( <>
         
@@ -44,6 +53,7 @@ function App() {
                         return <FillInSurvey 
                                     surveyInfo={surveysInfo.filter(s=>(s.surveyId==match.params.surveyId))[0]}
                                     surveyQuestions={surveysQuestions.filter(s=>(s.surveyId==match.params.surveyId))}
+                                    addFilledInSurvey = {addFilledInSurvey}
                                ></FillInSurvey>
                       else
                           return <>Survey Not Found </>
