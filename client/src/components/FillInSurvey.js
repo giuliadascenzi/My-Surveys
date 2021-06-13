@@ -1,8 +1,6 @@
-import { Card, Form, Row, Col, Button, Alert } from "react-bootstrap";
-import { BsCheckAll, BsFillPersonFill, BsBoxArrowInRight, BsFillQuestionSquareFill } from "react-icons/bs";
+import { Card, Form, Row, Col, Button } from "react-bootstrap";
 import { useState } from 'react';
-
-
+import { useHistory } from 'react-router-dom';
 
 /*Props passate da App:
 surveyInfo= informations about that specific survey (surveyId, title, owner, date )
@@ -17,6 +15,8 @@ function FillInSurvey(props) {
 
     const [answers, setAnswers] =useState([...data]);
     const [validated, setValidated] = useState(false);
+    const [user, setUser] = useState("");
+   
 
 
     const setAnswer = (answerIndex, answer) => 
@@ -32,20 +32,26 @@ function FillInSurvey(props) {
 
     }
 
+    let history = useHistory();
+
     const handleSubmit = (event) => {
 
-        const form = event.currentTarget;
-        if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-          console.log("no ok")
-        }else{
-
-        console.log("ora tutto OK")
-        setValidated(true);
+        // stop event default and propagation
         event.preventDefault();
-        }
+        event.stopPropagation(); 
 
+        const form = event.currentTarget; 
+
+        // check if form is valid using HTML constraints
+        if (!form.checkValidity()) { 
+        // errors
+        setValidated(true); // enables bootstrap validation error report
+        } else {
+        // submit the answers
+        props.addFilledInSurvey(props.surveyInfo.surveyId, answers, user);
+        // redirect to the home page
+        history.push("/");
+        }
 
       };
 
@@ -60,16 +66,18 @@ function FillInSurvey(props) {
             </Card.Header>
 
             <Card.Body>
-                <Form noValidate validated={validated} onSubmit={handleSubmit}>
+                
+                <Form noValidate validated={validated} onSubmit={handleSubmit} id="filled_in_survey">
                     <Form.Group as={Row} controlId="surveyForm" >
                         {/* Input label for the user name*/}
                         <Form.Label column sm="2" className="insertName">Write here your name:</Form.Label>
                         <Col sm="4">
-                            <Form.Control type="username" placeholder="Enter name"  required />
+                            <Form.Control type="username" placeholder="Enter name"  required onChange = {(event)=> setUser(event.target.value)}/>
                             <Form.Control.Feedback type="invalid">
                                 Please choose a username.
                             </Form.Control.Feedback>
                         </Col>
+                    </Form.Group>
                         {/* Questions ordered by increasing questionId below */}
                         {props.surveyQuestions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
                                               .map((sQ, sQind) => {
@@ -87,15 +95,15 @@ function FillInSurvey(props) {
                                                                             setAnswer={setAnswer}/>
                                                                 })}
 
-                    </Form.Group>
+                    
 
                 </Form>
             </Card.Body>
             <Card.Footer>
-                <Row>
+                
                     {/* submit button */}
-                    <SubmitButton handleSubmit={handleSubmit}></SubmitButton>
-                </Row>
+                    <SubmitButton />
+                
             </Card.Footer>
         </Card>
 
@@ -116,7 +124,7 @@ function ClosedQuestion(props) {
     
     const [ans, setAns] =useState([]);
     const [errMin, setErrMin] = useState((props.surveyQuestion.min>0))
-    const [errMax, setErrMax] = useState((props.surveyQuestion.max==0))
+    const [errMax, setErrMax] = useState((props.surveyQuestion.max===0))
 
 
 
@@ -130,7 +138,7 @@ function ClosedQuestion(props) {
                 props.setAnswer(props.questionIndex, data.join("_"))
                 if (data.length>= props.surveyQuestion.max)
                     setErrMax(true);
-                if (errMin==true && data.length>= props.surveyQuestion.min )
+                if (errMin===true && data.length>= props.surveyQuestion.min )
                     setErrMin(false);
 
                 
@@ -143,10 +151,10 @@ function ClosedQuestion(props) {
                 setAns(data);
                 props.setAnswer(props.questionIndex, data.join("_"))
 
-                if (errMax==true && data.length<props.surveyQuestion.max)
+                if (errMax===true && data.length<props.surveyQuestion.max)
                     setErrMax(false);
 
-                if (errMin==false && data.length< props.surveyQuestion.min )
+                if (errMin===false && data.length< props.surveyQuestion.min )
                     setErrMin(true);
 
             }
@@ -199,7 +207,7 @@ function OpenQuestion(props) {
                                 maxLength="200" 
                                 rows={3} 
                                 onChange={handleOpenQuestionChange}
-                                required = {props.surveyQuestion.obbligatoria == 1} />
+                                required = {props.surveyQuestion.obbligatoria === 1} />
                 <Form.Control.Feedback type="invalid">
                     Please fill in this answer.
                 </Form.Control.Feedback>
@@ -210,7 +218,7 @@ function OpenQuestion(props) {
 
 
 function SubmitButton(props) {
-    return <Button type="submit" className="btn btn-success btn-lg " onClick={props.handleSubmit}>
+    return<Button type="submit" className="btn btn-success btn-lg " form="filled_in_survey">
                 Submit your answers
            </Button>
 }

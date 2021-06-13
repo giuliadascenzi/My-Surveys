@@ -1,6 +1,8 @@
 import MyNavbar from './components/MyNavbar.js'
 import MySurveysTable from './components/MySurveysTable.js'
 import FillInSurvey from './components/FillInSurvey.js'
+import AdminHome from './AdminHome.js'
+import { LogInForm } from './components/LogInForm.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
 import { useState } from 'react';
@@ -24,18 +26,33 @@ const sQuestions= [{ questionId: 0, surveyId:0,  chiusa: 1, min:1, max:1, obblig
 { questionId: 0, surveyId:1, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" }
 
 ];
-const sAnswers=[];
+const sAnswers=[{answers: ["1", "1", "sdsdsdsdsd", "0"], surveyId: 0, user: "giulia"},
+{answers: ["2", "3", "economia", "0_1_2"], surveyId: 0, user: "nik"}
+ ];
 
 
 function App() {
   const [surveysInfo, setSurveysInfo] =useState([...sInfo]);
   const [surveysQuestions, setSurveysQuestions] =useState([...sQuestions]);
   const [surveysAnswers, setsurveysAnswers] =useState([...sAnswers]);
+  const [loggedIn, setLoggedIn] = useState(false); // at the beginning, no user is logged in
 
   const addFilledInSurvey = (surveyId, answers, user) => {
-    console.log("addFilledInSurvey");
+    /** function to add a new filled in survey. It's called submitting the fillInSurvey */
+    console.log("[addFilledInSurvey]");
     const FilledInSurvey = {surveyId: surveyId, answers: answers, user:user};
     setsurveysAnswers([...surveysAnswers, FilledInSurvey]);
+
+  }
+
+  const doLogIn = async (credentials) => {
+    console.log("logged in")
+    setLoggedIn(true);
+  }
+
+  const doLogOut = async () => {
+    console.log("logged out")
+    setLoggedIn(false);
 
   }
   
@@ -43,24 +60,32 @@ function App() {
         
         <Router>
             <title>My Online Surveys</title>
-            <MyNavbar/>
+            <MyNavbar loggedIn={loggedIn} doLogOut={doLogOut}/>
 
                 <Switch>
                   <Route path='/survey/:surveyId' render={({match}) =>
                       {
                       if (surveysInfo.map(s=>s.surveyId).includes(parseInt(match.params.surveyId)))
-
+                       { 
                         return <FillInSurvey 
                                     surveyInfo={surveysInfo.filter(s=>(s.surveyId==match.params.surveyId))[0]}
                                     surveyQuestions={surveysQuestions.filter(s=>(s.surveyId==match.params.surveyId))}
                                     addFilledInSurvey = {addFilledInSurvey}
                                ></FillInSurvey>
-                      else
+                      }else
                           return <>Survey Not Found </>
                       }  
                     }>
                       
                   </Route>
+                  <Route path='/home' render={() =>
+                  /**here should be the real admin username */
+                      <AdminHome adminUsername={"pattidegi"} surveysInfo={surveysInfo.filter(s=> s.owner=="pattidegi")} surveysQuestions={surveysQuestions} surveysAnswers={surveysAnswers}></AdminHome>
+                      }>
+                  </Route>
+                  <Route path="/login" render={() =>
+                   <>{loggedIn ? <Redirect to="/" /> : <LogInForm login={doLogIn}/>}</>} />
+
                   <Route path='/' render={() =>
                       <MySurveysTable surveysInfo={surveysInfo}></MySurveysTable>
                       }>
