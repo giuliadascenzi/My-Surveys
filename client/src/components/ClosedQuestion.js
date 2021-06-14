@@ -18,8 +18,6 @@ function ClosedQuestion(props) {
 
     const handleClosedQuestioinChanged = (event, ansIndex) => {
 
-        if (props.answer) return
-
         if (!ans.includes(ansIndex))
             {   
                 const data = [...ans, ansIndex]
@@ -55,23 +53,41 @@ function ClosedQuestion(props) {
         return <Form.Group controlid={"FillInSurvey.closeQuestion" + props.surveyQuestion.questionId} >
                  {/** Question */}
                 
-                <Form.Label  >{props.questionIndex+1 + ") " + props.surveyQuestion.question + (errMin? "*": "")}  </Form.Label>
+                <Form.Label  >{props.questionIndex+1 + ") " + props.surveyQuestion.question } </Form.Label>
+                
+                <Form.Text className="text-muted">
+                {props.surveyQuestion.min!=0? "This answer requires at least "+ props.surveyQuestion.min + " answers. " : "This answer is optional. "}
+                {"The maximum number of answers is "+ props.surveyQuestion.max+". "}
+                </Form.Text>
                 {/** Possible answers: */}
                 {props.surveyQuestion.answers.split("_").map((answer, ansIndex) =>
-
-                    <Form.Check
+                
+                {if (props.answer) //ReadOnly Question
+                   return <Form.Check
                         type="checkbox"
                         name={props.surveyQuestion.surveyId + props.surveyQuestion.questionId}
                         id={ansIndex}
                         label={answer}
-                        readOnly = {props.answer!=undefined}
-                        checked = {props.answer? props.answer.includes(ansIndex) : false}
+                        readOnly = {true}
+                        checked = {props.answer.includes(ansIndex)}
                         key={"checkbox" + ansIndex}
-                        onChange={(event)=>{ handleClosedQuestioinChanged(event, ansIndex)}}
                         disabled = {errMax && !ans.includes(ansIndex)}
                         required= {errMin}
                     />
+                else
+                    return <Form.Check
+                    type="checkbox"
+                    name={props.surveyQuestion.surveyId + props.surveyQuestion.questionId}
+                    id={ansIndex}
+                    label={answer}
+                    key={"checkbox" + ansIndex}
+                    onChange={(event)=>{ handleClosedQuestioinChanged(event, ansIndex)}}
+                    disabled = {errMax && !ans.includes(ansIndex)}
+                    required= {errMin}
+                />
 
+
+                }
                 )}
 
 

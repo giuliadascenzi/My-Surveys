@@ -13,7 +13,7 @@ function OpenQuestion(props) {
     
     const handleOpenQuestionChange = (event) =>
     {  
-        if (props.setAnswer)
+        
             props.setAnswer(props.questionIndex, event.target.value)
                
     }
@@ -23,13 +23,24 @@ function OpenQuestion(props) {
                 {/** Question: */}
                 <Form.Label  >{props.questionIndex+1 + ") " + props.surveyQuestion.question}  </Form.Label>
                 {/** Free space to answer: */}
-                <Form.Control   as="textarea"     
+                <Form.Text className="text-muted">
+                {props.surveyQuestion.obbligatoria? "This answer is mandatory" : "This answer is optional"}
+                </Form.Text>
+                {  props.answer?  //readOnly
+                     <Form.Control   as="textarea"     
                                 maxLength="200" 
                                 rows={3} 
-                                readOnly= {props.answer!= undefined}
+                                readOnly = {props.answer}
                                 value = {props.answer ? props.answer : ""}
-                                onChange={handleOpenQuestionChange}
+                                
                                 required = {props.surveyQuestion.obbligatoria === 1} />
+                
+                    :          
+                    <Form.Control   as="textarea"     
+                    maxLength="200" 
+                    rows={3} 
+                    onChange={handleOpenQuestionChange}
+                    required = {props.surveyQuestion.obbligatoria === 1} />  }
                 <Form.Control.Feedback type="invalid">
                     Please fill in this answer.
                 </Form.Control.Feedback>

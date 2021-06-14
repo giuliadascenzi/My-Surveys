@@ -1,6 +1,6 @@
 import { Card, Table, Row, Col, Button, Container,Alert } from "react-bootstrap";
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import { FcSearch, FcPlus} from "react-icons/fc";
 import {ImClipboard,ImPencil2} from "react-icons/im";
 import {  Link } from 'react-router-dom';
@@ -20,7 +20,7 @@ function AdminHome(props)
                           surveysQuestions={props.surveyQuestions} 
                           surveysAnswers={props.surveysAnswers}
                           />
-            <CreateNewSurvey />
+            <CreateNewSurvey adminUsername={props.adminUsername}/>
     </Container>
 }
 
@@ -74,14 +74,19 @@ function ResultsRow(props)
 
 
 function CreateNewSurvey(props)
-{
-    return <><>Create a new survey: </>
-     <Button variant="outline-secondary" >
-                  <ImPencil2
-                    size="20"
-                    fill="black"
-                  ></ImPencil2>
-               New survey</Button></>
-}
-
+{  console.log("home/"+props.adminUsername+"/NewSurvey");
+    return <>
+            <>Create a new survey: </>
+              <Link to={props.adminUsername+"/NewSurvey"}>
+                  <Button variant="outline-secondary" >
+                          <ImPencil2
+                            size="20"
+                            fill="black"
+                          ></ImPencil2>
+                      New survey
+                  </Button>
+              </Link>
+          </>
+        }
+    
 export default AdminHome;

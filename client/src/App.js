@@ -2,7 +2,7 @@ import MyNavbar from './components/MyNavbar.js'
 import MySurveysTable from './components/MySurveysTable.js'
 import FillInSurvey from './components/FillInSurvey.js'
 import AdminHome from './components/AdminHome.js'
-import SurveysResults from './components/SurveysResults.js'
+import CreateNewSurvey from './components/CreateNewSurvey.js'
 import { LogInForm } from './components/LogInForm.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
@@ -51,6 +51,13 @@ function App() {
 
   }
 
+  const insertNewSurvey = (surveyId, answers, user) => {
+    /** function to add a new  survey. It's called submitting the NewSurvey */
+    console.log("[insertNewSurvey]");
+
+
+  }
+
   const doLogIn = async (credentials) => {
     console.log("logged in")
     setLoggedIn(true);
@@ -87,8 +94,8 @@ function App() {
 
                  
 
-                  <Route path='/home/:username/filledInSurvey/:surveyId' render={({match}) =>
-                      { /** TODO: CHECK è lo username loggato???  */
+                {/*  <Route path='/home/:username/filledInSurvey/:surveyId' render={({match}) =>
+                      { TODO: CHECK è lo username loggato???  }}
                         console.log("sono qui")
                       if (surveysInfo.filter(s=> s.owner==match.params.username).map(s=>s.surveyId).includes(parseInt(match.params.surveyId)))
                        { 
@@ -102,7 +109,16 @@ function App() {
                     }>
 
                     </Route>
+                  */}
 
+                  <Route path='/home/:username/newSurvey' render={({match}) =>
+                  /**TODO: check if the user is logged in or not*/
+                      <CreateNewSurvey adminUsername={match.params.username}
+                                        insertNewSurvey={insertNewSurvey}/>
+                      }>
+                      
+                  </Route>
+                      
                     <Route path='/home/:username' render={({match}) =>
                   /**TODO: check if the user is logged in or not*/
                       <AdminHome 
