@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { FcSearch, FcPlus} from "react-icons/fc";
 import {ImClipboard,ImPencil2} from "react-icons/im";
 import {  Link } from 'react-router-dom';
-import SurveysResults from "./components/SurveysResults";
+import SurveysResults from "./SurveysResults";
 
 /** Props got from APP:
  * surveyInfo
@@ -38,7 +38,7 @@ function AdminResults(props)
         <th>Survey title</th>
         <th>Date</th>
         <th>Number of answers</th>
-        <th>         </th>
+        <th>Results        </th>
 
 
       </tr>
@@ -63,8 +63,8 @@ function ResultsRow(props)
     <td>{props.surveyInfo.title}</td>
     <td>{props.surveyInfo.date.format('dddd, MMMM D, YYYY h:mm A')}</td>
     <td>{props.surveysAnswers.filter(s => s.surveyId==props.surveyInfo.surveyId).length}</td>
-    <td><SurveysResults surveysQuestions={props.surveysQuestions.filter(s => s.surveyId == props.surveyInfo.surveyId)}
-                        surveysAnswers={props.surveysAnswers.filter(s => s.surveyId == props.surveyInfo.surveyId)}
+    <td><SurveysResults surveyQuestions={props.surveysQuestions.filter(s => s.surveyId == props.surveyInfo.surveyId)}
+                        surveyAnswers={props.surveysAnswers.filter(s => s.surveyId == props.surveyInfo.surveyId)}
                         surveyInfo={props.surveyInfo}/></td>
   </tr>
 </>

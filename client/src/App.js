@@ -1,7 +1,7 @@
 import MyNavbar from './components/MyNavbar.js'
 import MySurveysTable from './components/MySurveysTable.js'
 import FillInSurvey from './components/FillInSurvey.js'
-import AdminHome from './AdminHome.js'
+import AdminHome from './components/AdminHome.js'
 import SurveysResults from './components/SurveysResults.js'
 import { LogInForm } from './components/LogInForm.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -24,11 +24,16 @@ const sQuestions= [{ questionId: 0, surveyId:0,  chiusa: 1, min:1, max:1, obblig
 { questionId: 3, surveyId:0, chiusa: 1, min:0, max:3, obbligatoria:-1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
 
 { questionId: 2, surveyId:0, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che cosa studi?", answers: "" },
-{ questionId: 0, surveyId:1, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" }
+{ questionId: 0, surveyId:1, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" },
+{ questionId: 0, surveyId:2, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Come ha modificato la tua vita?", answers: "" }
 
 ];
-const sAnswers=[{filledInSurveyId:0, answers: ["1", "1", "ingegneria informatica", "0"], surveyId: 0, user: "giulia"},
-{filledInSurveyId:1, answers: ["2", "3", "economia", "0_1_2"], surveyId: 0, user: "nik"}
+const sAnswers=[{answers: ["1", "1", "ingegneria informatica", "0"], surveyId: 0, user: "giulia"},
+{ answers: ["2", "3", "economia", "0_1_2"], surveyId: 0, user: "nik"},
+{ answers: ["studio"], surveyId: 1, user: "nik"},
+{ answers: ["veterinaria"], surveyId: 1, user: "giusj"},
+{ answers: ["male"], surveyId: 2, user: "giusj"},
+{ answers: ["non bene"], surveyId: 2, user: "giulia"},
  ];
 
 

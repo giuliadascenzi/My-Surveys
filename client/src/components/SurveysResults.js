@@ -1,10 +1,12 @@
-import { Form, Modal, Button } from "react-bootstrap";
+import { Form, Modal, Button, Card, Row, Col} from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FcSearch, FcPlus} from "react-icons/fc";
 import {ImClipboard,ImPencil2} from "react-icons/im";
 import {AiOutlineArrowLeft, AiOutlineArrowRight}from "react-icons/ai";
 import {  Link } from 'react-router-dom';
+import { OpenQuestion } from './OpenQuestion.js';
+import { ClosedQuestion } from './ClosedQuestion.js';
 
 /**
  * props got from APP:
@@ -15,37 +17,37 @@ import {  Link } from 'react-router-dom';
 function SurveysResults(props)
 {
     const [show, setShow] = useState(false);
-    const [index, setInde]= useState(0);
+    const [index, setIndex]= useState(0);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-    const nextSurvey = () => console.log("+1");
-    const lastSurvey = () => console.log("-1");
+    const nextSurvey = () => {if (index+1 < props.surveyAnswers.length) setIndex(index+1)}
+    const lastSurvey = () => {if (index-1 >= 0) setIndex(index-1)}
   
     return (
       <>
         <CheckResultButton handleShow={handleShow}/>
         
-        <Modal show={show} onHide={handleClose}>
+        <Modal size="lg" show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>"{props.surveyInfo.title}"</Modal.Title>
           </Modal.Header>
           <Modal.Body>
               <OneSurveyResult
-                surveysQuestions={props.surveysQuestions}
-                surveyAnswers = {props.surveysAnswers.filter(s=> s.surveyId== props.surveyInfo.surveyId)}
+                surveyQuestions={props.surveyQuestions}
+                surveyAnswers = {props.surveyAnswers[index]}
                
               />
 
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="outline-secondary" onClick={lastSurvey}>
+            <Button variant="outline-secondary" onClick={lastSurvey} disabled={index==0}>
                   <AiOutlineArrowLeft
                     size="20"
                     fill="black"
                   />
             </Button>
-            <Button variant="outline-secondary" onClick={nextSurvey}>
+            <Button variant="outline-secondary" onClick={nextSurvey} disabled={index==props.surveyAnswers.length-1}>
                 <AiOutlineArrowRight
                     size="20"
                     fill="black"
@@ -70,26 +72,44 @@ function CheckResultButton(props)
 
 function OneSurveyResult(props)
 {
-    return <Form>
-    <Form.Group controlId="formBasicEmail">
-      <Form.Label>Email address</Form.Label>
-      <Form.Control type="email" placeholder="Enter email" />
-      <Form.Text className="text-muted">
-        We'll never share your email with anyone else.
-      </Form.Text>
-    </Form.Group>
-  
-    <Form.Group controlId="formBasicPassword">
-      <Form.Label>Password</Form.Label>
-      <Form.Control type="password" placeholder="Password" />
-    </Form.Group>
-    <Form.Group controlId="formBasicCheckbox">
-      <Form.Check type="checkbox" label="Check me out" />
-    </Form.Group>
-    <Button variant="primary" type="submit">
-      Submit
-    </Button>
-  </Form>
+    return <Card>
+
+            <Card.Body>
+                
+                <Form >
+                    <Form.Group as={Row} controlId="surveyForm" >
+                        {/* Input label for the user name*/}
+                        <Form.Label column sm="4" className="insertName">Write here your name:</Form.Label>
+                        <Col sm="4">
+                            <Form.Control type="username"  value={props.surveyAnswers.user? props.surveyAnswers.user : ""} readOnly/>
+                        </Col>
+                    </Form.Group>
+                        {/* Questions ordered by increasing questionId below */}
+                        {props.surveyQuestions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
+                                            .map((sQ, sQind) => { console.log(props.surveyAnswers.answers[sQind])
+                                                                    if (sQ.chiusa === 1) /* closed Question */
+                                                                        return <ClosedQuestion
+                                                                            surveyQuestion={sQ}
+                                                                            key={sQ.questionId}
+                                                                            questionIndex={sQind } 
+                                                                            answer = {props.surveyAnswers.answers[sQind]}
+                                                                            />
+                                                                    else                /* open Question */
+                                                                        return <OpenQuestion 
+                                                                            surveyQuestion={sQ}
+                                                                            key={sQ.questionId}
+                                                                            questionIndex={sQind} 
+                                                                            answer = {props.surveyAnswers.answers[sQind]}
+                                                                        
+                                                                            />
+                                                                })}
+
+                    
+
+                </Form>
+            </Card.Body>
+
+        </Card>
 }
 
 

@@ -5,10 +5,15 @@ import { useHistory } from 'react-router-dom';
 /*Props passate da FillInSurvey.js:
 surveyQuestion= the questions of this survey (questionId, surveyId, chiusa: 0, min:-1, max:-1, obbligatoria:0/1, question, answers: ""))
 setAnswer= function to set the answer of the question*/
+/** Props passate da SurveyResult
+ * surveyQuestion= the questions of this survey (questionId, surveyId, chiusa: 0, min:-1, max:-1, obbligatoria:0/1, question, answers: ""))
+* answer
+ */
 function OpenQuestion(props) {
     
     const handleOpenQuestionChange = (event) =>
     {  
+        if (props.setAnswer)
             props.setAnswer(props.questionIndex, event.target.value)
                
     }
@@ -21,6 +26,8 @@ function OpenQuestion(props) {
                 <Form.Control   as="textarea"     
                                 maxLength="200" 
                                 rows={3} 
+                                readOnly= {props.answer!= undefined}
+                                value = {props.answer ? props.answer : ""}
                                 onChange={handleOpenQuestionChange}
                                 required = {props.surveyQuestion.obbligatoria === 1} />
                 <Form.Control.Feedback type="invalid">
@@ -30,4 +37,4 @@ function OpenQuestion(props) {
             </Form.Group>
 }
 
-export default OpenQuestion;
+export  {OpenQuestion};
