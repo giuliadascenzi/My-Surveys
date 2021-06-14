@@ -2,6 +2,7 @@ import MyNavbar from './components/MyNavbar.js'
 import MySurveysTable from './components/MySurveysTable.js'
 import FillInSurvey from './components/FillInSurvey.js'
 import AdminHome from './AdminHome.js'
+import SurveysResults from './components/SurveysResults.js'
 import { LogInForm } from './components/LogInForm.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
@@ -26,8 +27,8 @@ const sQuestions= [{ questionId: 0, surveyId:0,  chiusa: 1, min:1, max:1, obblig
 { questionId: 0, surveyId:1, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" }
 
 ];
-const sAnswers=[{answers: ["1", "1", "sdsdsdsdsd", "0"], surveyId: 0, user: "giulia"},
-{answers: ["2", "3", "economia", "0_1_2"], surveyId: 0, user: "nik"}
+const sAnswers=[{filledInSurveyId:0, answers: ["1", "1", "ingegneria informatica", "0"], surveyId: 0, user: "giulia"},
+{filledInSurveyId:1, answers: ["2", "3", "economia", "0_1_2"], surveyId: 0, user: "nik"}
  ];
 
 
@@ -78,13 +79,41 @@ function App() {
                     }>
                       
                   </Route>
-                  <Route path='/home' render={() =>
-                  /**here should be the real admin username */
-                      <AdminHome adminUsername={"pattidegi"} surveysInfo={surveysInfo.filter(s=> s.owner=="pattidegi")} surveysQuestions={surveysQuestions} surveysAnswers={surveysAnswers}></AdminHome>
+
+                 
+
+                  <Route path='/home/:username/filledInSurvey/:surveyId' render={({match}) =>
+                      { /** TODO: CHECK è lo username loggato???  */
+                        console.log("sono qui")
+                      if (surveysInfo.filter(s=> s.owner==match.params.username).map(s=>s.surveyId).includes(parseInt(match.params.surveyId)))
+                       { 
+                        return <SurveysResults
+                                    surveyInfo={surveysInfo.filter(s=>s.owner=="pattidegi").filter(s=>(s.surveyId==match.params.surveyId))[0]}
+                                    surveyQuestions={surveysQuestions.filter(s=>(s.surveyId==match.params.surveyId))}
+                               ></SurveysResults>
+                      }else
+                          return <>Survey Not Found </>
+                      }  
+                    }>
+
+                    </Route>
+
+                    <Route path='/home/:username' render={({match}) =>
+                  /**TODO: check if the user is logged in or not*/
+                      <AdminHome 
+                        adminUsername={match.params.username} 
+                        surveysInfo={surveysInfo.filter(s=> s.owner==match.params.username)} 
+                        surveysAnswers={surveysAnswers}
+                        surveyQuestions={surveysQuestions}>
+                      </AdminHome>
                       }>
                   </Route>
+                      
+
                   <Route path="/login" render={() =>
-                   <>{loggedIn ? <Redirect to="/" /> : <LogInForm login={doLogIn}/>}</>} />
+                   {loggedIn ? <Redirect to="/" /> : <LogInForm login={doLogIn}/>}}>
+                   </Route>
+                 
 
                   <Route path='/' render={() =>
                       <MySurveysTable surveysInfo={surveysInfo}></MySurveysTable>

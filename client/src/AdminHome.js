@@ -1,15 +1,25 @@
-import { Card, Table, Row, Col, Button, Container } from "react-bootstrap";
+import { Card, Table, Row, Col, Button, Container,Alert } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FcSearch, FcPlus} from "react-icons/fc";
 import {ImClipboard,ImPencil2} from "react-icons/im";
 import {  Link } from 'react-router-dom';
+import SurveysResults from "./components/SurveysResults";
 
-
+/** Props got from APP:
+ * surveyInfo
+ * surveyQuestions
+ * adminUsername
+ * surveysAnswers
+ */
 function AdminHome(props)
 {
     return <Container fluid>
-            <AdminResults surveysInfo={props.surveysInfo} surveysQuestions={props.surveysQuestions} surveysAnswers={props.surveysAnswers}/>
+            <Alert variant="success">Hello, {props.adminUsername}. Welcome back!</Alert>
+            <AdminResults surveysInfo={props.surveysInfo} 
+                          surveysQuestions={props.surveyQuestions} 
+                          surveysAnswers={props.surveysAnswers}
+                          />
             <CreateNewSurvey />
     </Container>
 }
@@ -53,26 +63,15 @@ function ResultsRow(props)
     <td>{props.surveyInfo.title}</td>
     <td>{props.surveyInfo.date.format('dddd, MMMM D, YYYY h:mm A')}</td>
     <td>{props.surveysAnswers.filter(s => s.surveyId==props.surveyInfo.surveyId).length}</td>
-    <td><CheckResultButton surveyId={props.surveyInfo.surveyId}/></td>
+    <td><SurveysResults surveysQuestions={props.surveysQuestions.filter(s => s.surveyId == props.surveyInfo.surveyId)}
+                        surveysAnswers={props.surveysAnswers.filter(s => s.surveyId == props.surveyInfo.surveyId)}
+                        surveyInfo={props.surveyInfo}/></td>
   </tr>
 </>
 }
 
 
 
-/*Clicking on this button the user gets redirect to the page where he/she can fill in the selected survey*/
-function CheckResultButton(props)
-{
-    return <Link to={"/FilledInSurvey/"+ props.filledInSurveyId}>
-              <Button variant="outline-secondary" >
-                  <ImClipboard
-                    size="20"
-                    fill="black"
-                  ></ImClipboard>
-              </Button>
-            </Link>
-
-}  
 
 function CreateNewSurvey(props)
 {
