@@ -3,7 +3,7 @@ import MySurveysTable from './components/MySurveysTable.js'
 import FillInSurvey from './components/FillInSurvey.js'
 import AdminHome from './components/AdminHome.js'
 import CreateNewSurvey from './components/CreateNewSurvey.js'
-import { LogInForm } from './components/LogInForm.js'
+import {LogInForm} from './components/LogInForm.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
 import { useState } from 'react';
@@ -21,7 +21,7 @@ const sInfo = [{ surveyId: 0, title: "Abitudini culinarie tra gli studenti itali
 /*Keys: questionId,surveyId*/
 const sQuestions= [{ questionId: 0, surveyId:0,  chiusa: 1, min:1, max:1, obbligatoria:-1, question: "Quanti anni hai?", answers: "0-10_11-20_21-30_31-40_41+" },
 { questionId: 1, surveyId:0, chiusa: 1, min:1, max:1, obbligatoria:-1, question: "Nazionalità?", answers: "Italia_Spagna_Francia_Norvegia_Altro" },
-{ questionId: 3, surveyId:0, chiusa: 1, min:0, max:3, obbligatoria:-1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
+{ questionId: 3, surveyId:0, chiusa: 1, min:2, max:3, obbligatoria:-1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
 
 { questionId: 2, surveyId:0, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che cosa studi?", answers: "" },
 { questionId: 0, surveyId:1, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" },
@@ -76,6 +76,7 @@ function App() {
             <MyNavbar loggedIn={loggedIn} doLogOut={doLogOut}/>
 
                 <Switch>
+                  
                   <Route path='/survey/:surveyId' render={({match}) =>
                       {
                       if (surveysInfo.map(s=>s.surveyId).includes(parseInt(match.params.surveyId)))
@@ -132,7 +133,7 @@ function App() {
                       
 
                   <Route path="/login" render={() =>
-                   {loggedIn ? <Redirect to="/" /> : <LogInForm login={doLogIn}/>}}>
+                    loggedIn ? <Redirect to="/" /> : <LogInForm login={doLogIn}/>}>
                    </Route>
                  
 

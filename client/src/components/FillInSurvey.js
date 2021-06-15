@@ -45,13 +45,13 @@ function FillInSurvey(props) {
 
         // check if form is valid using HTML constraints
         if (!form.checkValidity()) { 
-        // errors
-        setValidated(true); // enables bootstrap validation error report
+            // errors
+            setValidated(true); // enables bootstrap validation error report
         } else {
-        // submit the answers
-        props.addFilledInSurvey(props.surveyInfo.surveyId, answers, user);
-        // redirect to the home page
-        history.push("/");
+            // submit the answers
+            props.addFilledInSurvey(props.surveyInfo.surveyId, answers, user);
+            // redirect to the home page
+            history.push("/");
         }
 
       };
