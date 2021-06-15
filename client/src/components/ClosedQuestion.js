@@ -18,12 +18,16 @@ function ClosedQuestion(props) {
 
     const handleClosedQuestioinChanged = (event, ansIndex) => {
 
+        if (props.answer ) return;
+
         if (!ans.includes(ansIndex))
             {   
+                console.log("inserendo ", ansIndex)
                 const data = [...ans, ansIndex]
                 setAns(data);
 
-                props.setAnswer(props.questionIndex, data.join("_"))
+                if (props.setAnswer)
+                    props.setAnswer(props.questionIndex, data.join("_"))
                 if (data.length>= props.surveyQuestion.max)
                     setErrMax(true);
                 if (errMin===true && data.length>= props.surveyQuestion.min )
@@ -32,12 +36,15 @@ function ClosedQuestion(props) {
                 
             } else
             {   
+                console.log("togliendo ", ansIndex)
                 const data=[];
                 for (let elm of ans)
                         if (elm!==ansIndex) data.push(elm);
 
+                
                 setAns(data);
-                props.setAnswer(props.questionIndex, data.join("_"))
+                if (props.setAnswer)
+                    props.setAnswer(props.questionIndex, data.join("_"))
 
                 if (errMax===true && data.length<props.surveyQuestion.max)
                     setErrMax(false);
@@ -62,32 +69,19 @@ function ClosedQuestion(props) {
                 {/** Possible answers: */}
                 {props.surveyQuestion.answers.split("_").map((answer, ansIndex) =>
                 
-                {if (props.answer) //ReadOnly Question
-                   return <Form.Check
+                 
+                   <Form.Check
                         type="checkbox"
                         name={props.surveyQuestion.surveyId + props.surveyQuestion.questionId}
                         id={ansIndex}
                         label={answer}
-                        readOnly = {true}
-                        checked = {props.answer.includes(ansIndex)}
+                        readOnly = {props.answer!=undefined}
+                        checked = {props.answer ? props.answer.includes(ansIndex) : ans.includes(ansIndex)}
                         key={"checkbox" + ansIndex}
                         disabled = {errMax && !ans.includes(ansIndex)}
                         required= {errMin}
+                        onChange = {(event) => handleClosedQuestioinChanged(event, ansIndex)}
                     />
-                else
-                    return <Form.Check
-                    type="checkbox"
-                    name={props.surveyQuestion.surveyId + props.surveyQuestion.questionId}
-                    id={ansIndex}
-                    label={answer}
-                    key={"checkbox" + ansIndex}
-                    onChange={(event)=>{ handleClosedQuestioinChanged(event, ansIndex)}}
-                    disabled = {errMax && !ans.includes(ansIndex)}
-                    required= {errMin}
-                />
-
-
-                }
                 )}
 
 
