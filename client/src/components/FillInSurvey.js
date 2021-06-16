@@ -82,7 +82,7 @@ function FillInSurvey(props) {
                         {/* Questions ordered by increasing questionId below */}
                         {props.surveyQuestions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
                                               .map((sQ, sQind) => {
-                                                                    if (sQ.chiusa === 1) /* closed Question */
+                                                                    if (sQ.chiusa) /* closed Question */
                                                                         return <ClosedQuestion
                                                                             surveyQuestion={sQ}
                                                                             key={sQ.questionId}
