@@ -28,3 +28,18 @@
 }
 
 
+#questionRow{
+  background-color: #a2a3b00d;
+margin-top: 10px;
+margin-bottom: 10px;
+border-radius: 20px;
+border-color: #e3e3e2e0;
+border-style: solid;
+border-width: 1px;
+
+}
+
+#bottoni{
+  margin-top: 10px;
+margin-left: 10px;
+}

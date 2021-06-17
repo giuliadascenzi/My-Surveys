@@ -1,34 +1,99 @@
-import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl } from "react-bootstrap";
+import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl, Alert } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FcSearch, FcPlus } from "react-icons/fc";
-import { ImClipboard, ImPencil2 } from "react-icons/im";
-import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
+import { FaArrowUp,FaArrowDown } from "react-icons/fa";
+import { RiDeleteBin5Fill } from "react-icons/ri";
 import { Link } from 'react-router-dom';
 import { OpenQuestion } from './OpenQuestion.js';
 import { ClosedQuestion } from './ClosedQuestion.js';
 
 
 function CreateNewSurvey(props) {
-    const [title, setTitle] = useState();
-    const [questions, setQuestions] = useState([{ questionId: 3, surveyId: 0, chiusa: 1, min: 0, max: 3, obbligatoria: -1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
-    ]);
+    const [title, setTitle] = useState("");
+    const [errTitle, setErrTitle] =useState(false);
+    const [errNumQuestion, setErrNumQuestion] =useState(false);
+
+    const [questions, setQuestions] = useState([{ questionId: 0, surveyId: 0, chiusa: 1, min: 0, max: 3, obbligatoria: -1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
+    { questionId: 1, surveyId:0, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che cosa studi?", answers: "" },
+    { questionId: 2, surveyId:0, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" }]);
+
+    let history = useHistory();
+
     const handleAddQuestion = (question) => {
+        if (errNumQuestion) setErrNumQuestion(false)
         console.log("quesion added");
-        /**TODO: aggiornare l'id della question e del survey */
+        /**TODO: aggiornare l'id del survey */
+        question.questionId = questions.length;
         setQuestions([...questions, question]);
     }
+
+    const handleQuestionMoveUp = (index) =>
+    {
+       //The question up need to go down and the question at index need to go at sQind-1
+       const data=[...questions];
+       data[index].questionId = index-1;
+       data[index-1].questionId = index;
+       setQuestions(data.sort((sq1, sq2) => sq1.questionId - sq2.questionId));
+
+    }
+    const handleQuestionMoveDown = (index) =>
+    {
+        //The question down need to go up and the question at index need to down at sQind-1
+        const data=[...questions];
+        data[index].questionId = index+1;
+        data[index+1].questionId = index; 
+        console.log(data.sort((sq1, sq2) => sq1.questionId - sq2.questionId))
+        setQuestions(data.sort((sq1, sq2) => sq1.questionId - sq2.questionId));
+    }
+
+    const handleRemoveQuestion = (sQind) =>
+    {   
+        const data = [...questions]
+        data.splice(sQind, 1)
+        console.log(sQind, data)
+        for (let i=0; i<data.length; i++)
+        {
+            data.questionId=i;
+        }
+        setQuestions(data);
+    }
+
+    const handleTitleChange= (event) =>
+    {
+        setTitle(event.target.value)
+        setErrTitle(event.target.value.trim().length==0)
+    }
+    const handleSubmitNewSurvey =(event) =>{
+        event.preventDefault();
+        //Check that the title has been inserted and that there is at least one question inserted
+        if (errTitle) return;
+        if (title.trim().length==0) 
+            {
+                setErrTitle(true);
+                return;
+            }
+        if (questions.length<1)
+         {setErrNumQuestion(true)
+         return;}
+        
+        //All good here, submit the survey
+        props.insertNewSurvey(title, questions, props.adminUsername);
+
+        history.goBack()
+    }
+
     return <Container>
         <Card>
             <Card.Header >
                 {/*Title of the survey */}
                 <Card.Title className="text-center" >New Survey</Card.Title>
                 <Row>
-                    <Form.Label column sm="2" className="insertTitle">Title:</Form.Label>
+                    <Form.Label column sm="2"  className="insertTitle">Title:</Form.Label>
                     <Col sm="8">
-                        <Form.Control type="title" placeholder="Enter title" required onChange={(event) => setTitle(event.target.value)} />
+                        <Form.Control type="title" isInvalid={errTitle} placeholder="Enter title" onChange={handleTitleChange} />
                         <Form.Control.Feedback type="invalid">
-                            Please choose a username.
+                            Please insert the title.
                         </Form.Control.Feedback>
                     </Col>
                 </Row>
@@ -38,145 +103,192 @@ function CreateNewSurvey(props) {
             <Card.Body>
 
                 <>Questions: </>
+                { errNumQuestion? <Alert variant="danger">Insert at least one question to submit the survey</Alert> : <></>}
 
                 {questions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
                     .map((sQ, sQind) => {
-                        if (sQ.chiusa) /* closed Question */
-                            return <ClosedQuestion
-                                surveyQuestion={sQ}
-                                key={sQ.questionId}
-                                questionIndex={sQind}
-                            />
-                        else                /* open Question */
-                            return <OpenQuestion
-                                surveyQuestion={sQ}
-                                key={sQ.questionId}
-                                questionIndex={sQind}
-                            />
+                        return <QuestionRow key={sQind} 
+                                            sQ={sQ} sQind={sQind} 
+                                            questions={questions} 
+                                            handleQuestionMoveUp={handleQuestionMoveUp} 
+                                            handleQuestionMoveDown={handleQuestionMoveDown} 
+                                            handleRemoveQuestion={handleRemoveQuestion}/>
+
                     })}
+
                 <Row>
-                    <AddQuestionButton submitQuestion={handleAddQuestion} />
+                    <AddQuestionButtonModal submitQuestion={handleAddQuestion} />
                 </Row>
 
             </Card.Body>
+            <Card.Footer>
+
+                {/* submit button */}
+                <Button variant="info"  className="btn btn-success btn-lg " onClick={handleSubmitNewSurvey} >
+                    Submit the survey
+                </Button>
+                {/**TODO ADD a discard buytton?? */}
+
+
+            </Card.Footer>
         </Card>
 
     </Container>
 }
 
+function QuestionRow(props)
+{
+   return <> <Container fluid id="questionRow"><Row >
+                            <Col sm="10">
+                                {props.sQ.chiusa ? /* closed Question */
+                                    <ClosedQuestion
+                                        surveyQuestion={props.sQ}
+                                        key={"question" + props.sQind}
+                                        questionIndex={props.sQind} />
 
-function AddQuestionButton(props) {
+                                    : <OpenQuestion
+                                        surveyQuestion={props.sQ}
+                                        key={"question" + props.sQind}
+                                        questionIndex={props.sQind}
+                                    />}
+
+                            </Col>
+                            <Col id="bottoni" >
+                                <Button key={"buttonUp"+props.sQind} variant="outline-secondary" disabled={props.sQind==0} onClick={()=> props.handleQuestionMoveUp(props.sQind)}>
+                                    <FaArrowUp fill="black"/>
+                                </Button>
+                                <Button  key={"buttonDown"+props.sQind} variant="outline-secondary" disabled={props.sQind==props.questions.length-1} onClick={()=> props.handleQuestionMoveDown(props.sQind)}>
+                                    <FaArrowDown fill="black"/>
+                                </Button>
+                                <Button  key={"remove"+props.sQind} variant="outline-secondary"onClick={()=> props.handleRemoveQuestion(props.sQind)}>
+                                    <RiDeleteBin5Fill fill="black"/>
+                                </Button>
+                            </Col>
+                        </Row>
+                        </Container>
+                        </>
+}
+
+function AddQuestionButtonModal(props) {
     const [show, setShow] = useState(false)
-    const [questionText, setQuestionText] = useState();
+    const [questionText, setQuestionText] = useState(" ");
     const [numAnswers, setNumAnswers] = useState("1");
     const [max, setMax] = useState("0");
     const [min, setMin] = useState("0");
-    const [chiusa, setChiusa] = useState(true);
+    const [chiusa, setChiusa] = useState(false);
     const [obbligatoria, setObbligatoria] = useState(false);
-    const [possibleAnswers, setPossibleAnswers] = useState([""]);
-    const [err, setErr] = useState({ numAnswers: false, min: false, max: false, questionText: false})
+    const [possibleAnswers, setPossibleAnswers] = useState([""]); //already inserted the first (mandatory) possible answer
+    const [errText, setErrText] = useState(false);
+    const [errPossibleAnswers, setErrPossibleAnswers] = useState([true]) //already inserted the value for the first answer
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
     const handleChooseTypeOfQuestion = (event) => {
-        console.log(event.target.id);
         if (event.target.id == "radio-openQuestion")
             setChiusa(false)
         else
             setChiusa(true)
     }
+
     const handleNumAnswersChange = (event) => {
-        const newValue=parseInt(event.target.value)
+        event.preventDefault();
+        const newValue = parseInt(event.target.value)
+        setNumAnswers(newValue);
 
-        setNumAnswers( newValue)
 
-        if ( newValue > 10 ||  newValue < 1) //Error: numAnswers not valid 
-        { 
-            if (!err.numAnswers)
-                setErr({ numAnswers: true, min: err.min, max: err.max, questionText: err.questionText });
-            if ( newValue < 0)
-                setPossibleAnswers([]);
-            return;
-        }
-
-        else //ValidNumber, if err.numAnswer is set, change it
+        if (newValue > 10 || newValue < 1) //Error: numAnswers not valid 
         {
-            if (err.numAnswers)
-                setErr({ numAnswers: false, min: err.min, max: err.max, questionText: err.questionText });
+            if (newValue < 0) //Reset possible answers
+            {
+                setPossibleAnswers([]);
+                setErrPossibleAnswers([]);
+            }
+            return;
         }
 
         const data = []
-        if ( newValue <= possibleAnswers.length) //The numAnswers has been decreased. I keep the first answers and delete the latest ones
+        const err = []
+        if (newValue <= possibleAnswers.length) //The numAnswers has been decreased. I keep the first answers and delete the latest ones
         {
-            for (let i = 0; i < event.target.value; i++)
+            for (let i = 0; i < event.target.value; i++) {
                 data.push(possibleAnswers[i]);
+                err.push(errPossibleAnswers[i])
+            }
 
             setPossibleAnswers(data);
+            setErrPossibleAnswers(err);
         }
         else //The numAnswers has been increased of event.target.value- possibleAnswers.length answers. I keep the first answers and add new ones
         {
-            for (let i = 0; i < event.target.value - possibleAnswers.length; i++)
+            for (let i = 0; i < event.target.value - possibleAnswers.length; i++) {
                 data.push("");
+                err.push(true);
+            }
             setPossibleAnswers(possibleAnswers.concat(data));
+            setErrPossibleAnswers(errPossibleAnswers.concat(err))
         }
     }
 
-    const handleMinChange = (event) => {
-        const newValue=parseInt(event.target.value)
-        setMin(newValue);
-        if (newValue > max || newValue< 0) //Error: min not valid 
-        {       
-            if (!err.min)
-                setErr({ numAnswers: err.numAnswers, min: true, max: err.max, questionText: err.questionText });
-            return;
-        }
 
-        else //ValidNumber, if err.min is set, change it
-        {
-            if (err.min)
-                setErr({ numAnswers: err.numAnswers, min: false, max: err.max , questionText: err.questionText});
-        }
-
-    }
-
-
-    const handleMaxChange = (event) => {
-        const newValue=parseInt(event.target.value)
-        setMax(newValue);
-
-        if (newValue > numAnswers || newValue< min) //Error: max not valid 
-        {
-            
-            if (!err.max)
-                setErr({ numAnswers: err.numAnswers, min: err.min, max: true, questionText: err.questionText });
-            return;
-        }
-
-        else //ValidNumber, if err.max is set, change it
-        {
-            if (err.max)
-                setErr({ numAnswers: err.numAnswers, min: err.min, max: false, questionText: err.questionText });
-        }
-
-    }
     const handleAddedTextPossibleAnswer = (event, index) => {
+
         let data = []
+        let err = []
         for (let i = 0; i < possibleAnswers.length; i++) {
-            if (i == index)
+            if (i == index) {
                 data.push(event.target.value);
-            else
+                err.push(event.target.value.trim().length == 0);
+            }
+            else {
                 data.push(possibleAnswers[i]);
+                err.push(errPossibleAnswers[i]);
+            }
         }
         setPossibleAnswers(data);
+        setErrPossibleAnswers(err);
     }
+
     const handleSubmit = (event) => {
-        //{ questionId: 3, surveyId:0, chiusa: 1, min:0, max:3, obbligatoria:-1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
+        event.preventDefault();
+        //check errors
+
+        if ((numAnswers > 10) || (numAnswers < 1) || (max > numAnswers) || (max < min) || (min < 0)) //One or more fields invalid
+        {
+            console.log("errori nei tre cammpi")
+            return;
+        }
+        if (questionText.trim().length == 0) //Text of the question missing
+        {
+            setErrText(true);
+            return;
+        }
+
+        if (chiusa && errPossibleAnswers.filter(err => err == true).length != 0) //one of the answers has not been filled in
+        {
+            return
+        }
+
+
+        //Question format: { questionId: , surveyId:, chiusa: , min:, max:, obbligatoria:, question: , answers: },
+        //surveyId and questionId will be set from the component above.
         const newQuestion = { questionId: -1, surveyId: -1, chiusa: chiusa, min: min, max: max, obbligatoria: obbligatoria, question: questionText, answers: possibleAnswers.join("_") }
         props.submitQuestion(newQuestion);
+        handleClose();
     }
+
+    const handleTextChange = (event) => {
+        setQuestionText(event.target.value)
+        if (event.target.value.trim().length == 0)
+            setErrText(true)
+        if (errText && event.target.value.trim().length != 0)
+            setErrText(false)
+    }
+
+
+
     return <>
-        <Button variant="success" size="sm" className="fixed-left-bottom" onClick={handleShow}>
+        <Button variant="success" size="lg" className="fixed-left-bottom" onClick={handleShow}>
             + Add question
         </Button>
         <Modal size="lg" show={show} onHide={handleClose}>
@@ -194,15 +306,17 @@ function AddQuestionButton(props) {
                         <Form.Check
                             type='radio'
                             name='typeOfQuestion'
-                            id={`radio-closeQuestion`}
+                            id="radio-closeQuestion"
+                            key="radio-closeQuestion"
                             label={"Close"}
-                            defaultChecked
                         />
                         <Form.Check
                             type='radio'
                             name='typeOfQuestion'
                             id={`radio-openQuestion`}
+                            key="radio-OpenQuestion"
                             label={"Open"}
+                            defaultChecked
                         />
 
                     </Col>
@@ -214,7 +328,7 @@ function AddQuestionButton(props) {
                         Text of the question
                     </Form.Label>
                     <Col sm={7}>
-                        <Form.Control as="textarea" isInvalid={err.testo} type="text" placeholder="text" onChange={(ev) => setQuestionText(ev.target.value)} />
+                        <Form.Control as="textarea" isInvalid={errText} type="text" placeholder="text" onChange={handleTextChange} />
                         <Form.Control.Feedback type="invalid">Required field</Form.Control.Feedback>
                     </Col>
                 </Form.Group>
@@ -226,6 +340,7 @@ function AddQuestionButton(props) {
                         <Form.Check
                             type='checkbox'
                             name='obbligatoria'
+                            key="obbligatoria"
                             id={`radio-MandatoryQuestion`}
                             label={"Is the answer mandatory?"}
                             onChange={(ev) => setObbligatoria(ev.target.checked)}
@@ -246,6 +361,8 @@ function AddQuestionButton(props) {
                                         <Form.Control key={"numAnswersCheckbox"}
                                             type="number"
                                             placeholder="Tot"
+                                            id="tot"
+                                            key="tot"
                                             value={numAnswers}
                                             isInvalid={((numAnswers > 10) || (numAnswers < 1))}
                                             onChange={handleNumAnswersChange} />
@@ -267,12 +384,14 @@ function AddQuestionButton(props) {
                                         <Form.Control type="number"
                                             placeholder="max"
                                             value={max}
+                                            id="max"
+                                            key="max"
                                             isInvalid={((max > numAnswers) || (max < min))}
-                                            onChange={handleMaxChange} />
+                                            onChange={(event) => setMax(parseInt(event.target.value))} />
                                     </Col>
                                     <Col sm={5} >
                                         <Form.Text muted>
-                                            It can't exceed the total of answers.
+                                            It can't exceed the total of answers and must be greater than the minimum.
                                         </Form.Text>
                                     </Col>
                                 </Row>
@@ -286,9 +405,11 @@ function AddQuestionButton(props) {
                                     <Col sm={2}>
                                         <Form.Control type="number"
                                             placeholder="min"
+                                            id="min"
+                                            key="min"
                                             value={min}
                                             isInvalid={((min > max) || (min < 0))}
-                                            onChange={handleMinChange} />
+                                            onChange={(event) => setMin(parseInt(event.target.value))} />
                                     </Col>
                                     <Col sm={5} >
                                         <Form.Text muted>
@@ -307,16 +428,18 @@ function AddQuestionButton(props) {
                                     </Row> : <></>}
                                 {possibleAnswers.map((an, index) =>
 
-                                    <InputGroup className="mb-3">
+                                    <InputGroup className="mb-3" key={"possibleAnswer" + index}>
                                         <InputGroup.Prepend>
-                                            <InputGroup.Text key={"possAnswer" + index} id="inputGroup-sizing-sm">-</InputGroup.Text>
+                                            <InputGroup.Text id="inputGroup-sizing-sm">-</InputGroup.Text>
                                         </InputGroup.Prepend>
                                         <FormControl as="textarea"
-                                            key={"possibleQuestion" + index}
+                                            key={"possibleAnswer" + index}
+                                            id={"possibleAnswer" + index}
                                             rows={1}
+                                            isInvalid={errPossibleAnswers[index]}
                                             onChange={(event) => handleAddedTextPossibleAnswer(event, index)}
-                                            required
-                                            />
+
+                                        />
                                         <Form.Control.Feedback type="invalid">Required field</Form.Control.Feedback>
                                     </InputGroup>
                                 )

@@ -51,9 +51,13 @@ function App() {
 
   }
 
-  const insertNewSurvey = (surveyId, answers, user) => {
+  const insertNewSurvey = (title, questions, owner) => {
     /** function to add a new  survey. It's called submitting the NewSurvey */
     console.log("[insertNewSurvey]");
+    //Insert in sInfo table format = { surveyId: , title: , owner: , date: }
+
+    //Insert all the questions in sQuestions, adding in each question the surveyId **TODO**
+    console.log(title, questions, owner);
 
 
   }
