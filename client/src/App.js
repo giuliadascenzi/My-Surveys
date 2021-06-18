@@ -97,24 +97,6 @@ function App() {
                       
                   </Route>
 
-                 
-
-                {/*  <Route path='/home/:username/filledInSurvey/:surveyId' render={({match}) =>
-                      { TODO: CHECK è lo username loggato???  }}
-                        console.log("sono qui")
-                      if (surveysInfo.filter(s=> s.owner==match.params.username).map(s=>s.surveyId).includes(parseInt(match.params.surveyId)))
-                       { 
-                        return <SurveysResults
-                                    surveyInfo={surveysInfo.filter(s=>s.owner=="pattidegi").filter(s=>(s.surveyId==match.params.surveyId))[0]}
-                                    surveyQuestions={surveysQuestions.filter(s=>(s.surveyId==match.params.surveyId))}
-                               ></SurveysResults>
-                      }else
-                          return <>Survey Not Found </>
-                      }  
-                    }>
-
-                    </Route>
-                  */}
 
                   <Route path='/home/:username/newSurvey' render={({match}) =>
                   /**TODO: check if the user is logged in or not*/

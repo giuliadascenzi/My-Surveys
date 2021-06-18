@@ -29,7 +29,7 @@ function AdminResults(props)
 {
     return <>
     <Row className="px-3">
-        In the following table are shown all the surveys you have created:
+        In the following table are shown all the surveys you have created so far:
     </Row>
     
     <Table striped  >

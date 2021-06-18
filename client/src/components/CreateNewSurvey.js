@@ -51,7 +51,6 @@ function CreateNewSurvey(props) {
     {   
         const data = [...questions]
         data.splice(sQind, 1)
-        console.log(sQind, data)
         for (let i=0; i<data.length; i++)
         {
             data.questionId=i;
