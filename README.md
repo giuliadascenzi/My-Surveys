@@ -1,6 +1,14 @@
 # Exam #1234: "Exam Title"
 ## Student: s123456 LASTNAME FIRSTNAME 
 
+
+
+TODO:
+{
+"surveyId":3, "user":"giuliadash", "answers": ["1","1", "ingegneria informatica", "0"]
+} 
+
+
 ## React Client Application Routes
 
 - Route `/`: page content and purpose
