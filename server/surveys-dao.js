@@ -17,7 +17,7 @@ exports.getAllSurveysInfo = () => {
             if (err)
                 reject(err);
             else {
-                const sInfo = rows.map(record => ({ surveyId: record.surveyId, title: record.title, owner: record.title, date: dayjs(record.date) }));
+                const sInfo = rows.map(record => ({ surveyId: record.surveyId, title: record.title, owner: record.owner, date: dayjs(record.date) }));
                 resolve(sInfo);
             }
         });
@@ -110,19 +110,56 @@ exports.checkSurveyIdExists = (surveyId) => {
     });
 };
 
+exports.checkNumberOfAnswers = (surveyId, numOfAnswers) => {
+
+  return new Promise((resolve, reject) => {
+         const sql1 = "SELECT COUNT(*) as NUM FROM S_QUESTIONS WHERE SurveyId=?";
+         db.get(sql1, [surveyId], (err, rows) => { 
+                                                  if (err) 
+                                                  {
+                                                    
+                                                    return reject(err);
+                                                  }
+                                                  else if (rows.NUM !==numOfAnswers)
+                                                      { 
+                                                        
+                                                      return reject("Number of answers different from the number of survey's questions");;
+                                                      }
+                                                  else
+                                                      resolve(true);
+                                                 });
+
+    });
+};
+
 exports.checkAnswerValidity = (surveyId, questionId, answer) => {
 
   return new Promise((resolve, reject) => {
-         const sql1 = "SELECT * as FROM S_QUESTIONS WHERE SurveyId=? AND QuestionId=?";
-         db.get(sql1, [surveyId, questionId], (err, rows) => { 
-                                                  console.log(rows)
+          
+          const sql1 = "SELECT * FROM S_QUESTIONS WHERE (surveyId=? AND questionId=?)";
+          db.all(sql1, [surveyId, questionId], (err, rows) => { 
+                                                  if (rows==undefined) return reject("Error checking the validity of the answers");
                                                   if (err) 
                                                   {
                                                     return reject(err);
                                                   }
                                                   
+                                                  let question= rows[0];
+                                                  if (question.chiusa==1) //Closed question
+                                                  {
+                                                    let answers = answer.split("_"); //Format of the answer indexA_indexB_indexC 
+                                                    if (answers.length< question.min || answers.length> question.max) return reject("One or more answer are not valid 151");
+                                                    let validAnswers = [...Array(question.answers.split("_").length).keys()] //The valid answers are number in range (0, maxAnswers) because the answers are the indexes of the closed answers chosen.
+                                                    
+                                                    if (answers.filter(a => !validAnswers.includes(parseInt(a))).length!=0) return reject("One or more answer are not valid 153");
+                                                    resolve(true)
+                                                  }
                                                   else
-                                                      resolve(true);
+                                                  {
+                                                    if (question.obbligatoria==1 && answer.trim()=="") return reject("One or more answer are not valid 158");
+                                                    resolve(true)
+                                                  }
+                                                      
                                                  });
 
     });
@@ -131,8 +168,14 @@ exports.checkAnswerValidity = (surveyId, questionId, answer) => {
 exports.insertAnswers = (surveyId, user, answers)=> {
 
   return new Promise((resolve, reject) => {
+    /** I must change the answers format in the accepted format: ["ans1", "ans2", "ans3"] */
+    let ans = "[";
+    for (let i=0; i< answers.length-1; i++)
+         ans = ans + '"'+answers[i]+'",';
+    ans= ans + '"'+answers[answers.length-1]+'"]';
+
     const sql = "INSERT INTO S_ANSWERS(surveyId, user, answers) VALUES (?, ?, ?)";
-    db.run(sql, [surveyId, user, answers], function (err) {
+    db.run(sql, [surveyId, user, ans], function (err) {
       if (err) {
         reject(err);
         return;
@@ -143,134 +186,3 @@ exports.insertAnswers = (surveyId, user, answers)=> {
   });
 };
     
-
-/*
-
-exports.getImportant = (userId=1) => {
-
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM tasks WHERE (user = ? AND important=1)";
-    db.all(sql, [userId], (err, rows) => {
-      if (err)
-        reject(err);
-      else {
-        const tasks = rows.map(record => ({ id: record.id, description: record.description, important: record.important, private: record.private, deadline: record.deadline, user: record.user, completed: record.completed }));
-
-        resolve(tasks);
-      }
-    });
-  });
-};
-
-exports.getPrivate = (userId=1) => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM tasks WHERE (user = ? AND private=1)";
-    db.all(sql, [userId], (err, rows) => {
-      if (err)
-        reject(err);
-      else {
-        const tasks = rows.map(record => ({ id: record.id, description: record.description, important: record.important, private: record.private, deadline: record.deadline, completed: record.completed }));
-        resolve(tasks);
-      }
-    });
-  });
-};
-
-exports.getTask = ( taskId, userId=1) => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM tasks WHERE (user = ? AND id=?)";
-    db.get(sql, [userId, taskId], (err, row) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      if (row == undefined) {
-        resolve({ error: 'Task not found.' });
-      } else {
-        const task = { id: row.id, description: row.description, important: row.important, private: row.private, deadline: row.deadline, completed: row.completed };
-        resolve(task);
-      }
-    });
-  });
-};
-
-// add a new task
-exports.createTask = (task, userId=1) => {
-
-  return new Promise((resolve, reject) => {
-    const sql = "INSERT INTO tasks(id, description, important, private, deadline, completed, user) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    db.run(sql, [task.id, task.description, task.important, task.private, task.deadline, 0, userId], function (err) {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      resolve(this.lastID);
-    });
-  });
-};
-
-  exports.getSevenDaysTasks = (todayDate, sevenDays, userId=1) => {
-    return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM tasks WHERE (user = ? AND deadline >=? AND deadline<=?)' ;
-      db.all(sql, [userId, todayDate+" 00:00", sevenDays+" 23:59"], (err, rows) => {
-        if(err){
-
-          reject(err);}
-        else {
-
-          const tasks = rows.map(record => ({id:record.id, description:record.description, important:record.important, private: record.private, deadline: record.deadline, completed: record.completed}));
-          resolve(tasks);
-        }
-      });
-    });
-  };
-
-
-
-exports.getTodayTasks = (todayDate, userId=1) => {
-    return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM tasks WHERE (user = ? AND deadline >=? AND deadline<=?)' ;
-      db.all(sql, [userId, todayDate+" 00:00", todayDate+" 23:59"], (err, rows) => {
-        if(err)
-          reject(err);
-        else {
-
-          const tasks = rows.map(record => ({id:record.id, description:record.description, important:record.important, private: record.private, deadline: record.deadline, completed: record.completed}));
-          resolve(tasks);
-        }
-      });
-    });
-  }
-
-
-// update an existing Task
-exports.updateTask = (task, userId=1) => {
-  return new Promise((resolve, reject) => {
-    const sql = 'UPDATE tasks SET description=?, important=?, private=?, deadline=?, completed=? WHERE (user = ? AND id=?)';
-    db.run(sql, [task.description, task.important, task.private, task.deadline, task.completed, userId, task.id], function (err, result) {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      resolve(task.id);
-    });
-  });
-};
-
-
-// delete an existing exam
-exports.deleteTask = (id, userId=1) => {
-  return new Promise((resolve, reject) => {
-    const sql = 'DELETE FROM tasks WHERE (user = ? AND id = ?)';
-    db.run(sql, [userId, id], (err) => {
-      if (err) {
-        reject(err);
-        return;
-      } else
-        resolve(null);
-    });
-  });
-}
-*/

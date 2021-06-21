@@ -1,8 +1,6 @@
-import { Card, Table, Row, Col, Button, Container,Alert } from "react-bootstrap";
-import { useState } from 'react';
-import { Redirect, useHistory } from 'react-router-dom';
-import { FcSearch, FcPlus} from "react-icons/fc";
-import {ImClipboard,ImPencil2} from "react-icons/im";
+import { Table, Row, Button, Container,Alert } from "react-bootstrap";
+import dayjs from 'dayjs';
+import {ImPencil2} from "react-icons/im";
 import {  Link } from 'react-router-dom';
 import SurveysResults from "./SurveysResults";
 
@@ -57,11 +55,11 @@ function AdminResults(props)
 }
 
 function ResultsRow(props)
-{
+{  //TODO: disabilita il tasto in caso le risposte non sono almeno 1 o sfancula
     return <>
     <tr>
     <td>{props.surveyInfo.title}</td>
-    <td>{props.surveyInfo.date.format('dddd, MMMM D, YYYY h:mm A')}</td>
+    <td>{props.surveyInfo.date? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY h:mm A') : ""}</td>
     <td>{props.surveysAnswers.filter(s => s.surveyId==props.surveyInfo.surveyId).length}</td>
     <td><SurveysResults surveyQuestions={props.surveysQuestions.filter(s => s.surveyId == props.surveyInfo.surveyId)}
                         surveyAnswers={props.surveysAnswers.filter(s => s.surveyId == props.surveyInfo.surveyId)}
@@ -74,7 +72,7 @@ function ResultsRow(props)
 
 
 function CreateNewSurvey(props)
-{  console.log("home/"+props.adminUsername+"/NewSurvey");
+{  
     return <>
             <>Create a new survey: </>
               <Link to={props.adminUsername+"/NewSurvey"}>

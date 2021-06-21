@@ -42,12 +42,14 @@ app.get('/api/surveysAnswers', async (req, res) => {
 
 // Insert new survey
 // POST /api/survey
+// ACCEPTED FORMAT : {title: , owner: , date: , questions: []}
+// ACCEPTED FORMAT FOR EACH QUESTION : {chiusa: , question: , min: , max: , obbligatoria: , answers: } (in case its closed mandatory all except obbligatoria, in case its open mandatory all except min, max, answers)
 // **TODO**: check che owner is logged in
 app.post('/api/survey',
   [check('title', 'title must be a not empty string').notEmpty(),
   check('owner', 'owner must be a not empty string').notEmpty(),
   check('date', 'date must be in format yyyy-mm-dd ').matches("(^$|^(19|20)[0-9][0-9]\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$)"),
-  check('questions', '"questions" must be an array of length>1').isArray({ min: 1, max: 10 }),
+  check('questions', '"questions" must be an array of length>1').isArray({ min: 1 }),
   check('questions.*.chiusa', '"chiusa" attribute of each question must be or 0 (=open) or 1 (=closed)').isInt({ min: 0, max: 1 }), // * is a wildcard, means that that check is needed for each element of the array
   check('questions.*.question', '"question" attribute of each questions must not be empty').notEmpty(),
   check('questions').custom(questions => {
@@ -90,14 +92,14 @@ app.post('/api/survey',
       .then((id) => surveyId = id)  //It returns the surveyId inserted
       .then (() => dao_surveys.insertQuestions(req.body.questions, surveyId))
       .then (() => res.status(200).json("Survey inserted correctly").end())
-      .catch((err) => res.status(500).json({ error: 'DB error', description: err.message }))
+      .catch((err) => res.status(500).json({ error: 'Error inserting the survey in the db', description: err }))
 
   });
 
 
 // Insert new filled survey in the answers table
-// POST /api/answer
-app.post('/api/filledInSurvey', 
+// POST /api/filledSurvey
+app.post('/api/filledSurvey', 
     [
         check('surveyId', "surveyID must be an int").isInt(),
         check('user', "user attribute missing").notEmpty(),
@@ -108,18 +110,24 @@ app.post('/api/filledInSurvey',
         const errors = validationResult(req);
         if (!errors.isEmpty())
             return res.status(400).json({ error: 'Bad Request', description: 'Invalid parameters', errors: errors.array() })
-
-        const checkAnswersValidity = async(surveyId)=>
-         {
+        
+        const checkAnswersValidity = async(surveyId, answers)=>
+         { 
            for (let i=0; i<answers.length; i++)
-            { await dao_surveys.checkAnswerValidity(surveyId, i, answers[i])
+            { 
+              await dao_surveys.checkAnswerValidity(surveyId, i, answers[i]) //check the answer i
             }
          }
+         //TODO: check if the owner is the logged in admin
         dao_surveys.checkSurveyIdExists(req.body.surveyId) //1) check that the survey exists
-            .then(() => checkAnswersValidity(req.body.surveyId)) //2) for each answer check that is consistent with the question restriction
-            .then(()=> dao_surveys.insertAnswers(req.body.surveyId, req.body.user, req.body.answers)) //3) Insert in the db
+            .then(console.log("surveyOK"))
+            .then( ()=> dao_surveys.checkNumberOfAnswers(req.body.surveyId, req.body.answers.length)) //2) Check if the answers are the right number acording to the number of questions of that survey
+            .then(console.log("numberAnswersOK"))
+            .then(() => checkAnswersValidity(req.body.surveyId, req.body.answers)) //3) for each answer check that is consistent with the question restriction
+            .then(console.log("answersValidity"))
+            .then(()=> dao_surveys.insertAnswers(req.body.surveyId, req.body.user, req.body.answers)) //4) Insert in the db
             .then(() => res.status(200).json("Answers inserted correctly").end())
-            .catch((err) => res.status(500).json({ error: 'DB error', description: err }))
+            .catch((err) => res.status(500).json({ error: 'Error inserting the answers in the db', description: err }))
     });
 
 

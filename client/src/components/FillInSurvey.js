@@ -49,7 +49,7 @@ function FillInSurvey(props) {
             setValidated(true); // enables bootstrap validation error report
         } else {
             // submit the answers
-            props.addFilledInSurvey(props.surveyInfo.surveyId, answers, user);
+            props.addFilledSurvey(props.surveyInfo.surveyId, answers, user);
             // redirect to the home page
             history.push("/");
         }
@@ -68,7 +68,7 @@ function FillInSurvey(props) {
 
             <Card.Body>
                 
-                <Form noValidate validated={validated} onSubmit={handleSubmit} id="filled_in_survey">
+                <Form noValidate validated={validated} onSubmit={handleSubmit} id="filled_survey">
                     <Form.Group as={Row} controlId="surveyForm" >
                         {/* Input label for the user name*/}
                         <Form.Label column sm="2" className="insertName">Write here your name:</Form.Label>
@@ -122,7 +122,7 @@ function FillInSurvey(props) {
 
 
 function SubmitButton(props) {
-    return<Button type="submit" className="btn btn-success btn-lg " form="filled_in_survey">
+    return<Button type="submit" className="btn btn-success btn-lg " form="filled_survey">
                 Submit your answers
            </Button>
 }

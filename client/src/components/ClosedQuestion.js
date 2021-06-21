@@ -1,6 +1,5 @@
-import { Card, Form, Row, Col, Button } from "react-bootstrap";
+import { Form} from "react-bootstrap";
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 /*Props passate da FillInSurvey:
 surveyQuestion= the questions of this survey (questionId, surveyId, chiusa: 1, min:num, max:num, obbligatoria:-1, question, answers: *separated by _*))
 setAnswer= function to set the answer of the question*/

@@ -1,6 +1,7 @@
 import { Table, Row, Button} from "react-bootstrap";
 import { RiSurveyLine} from "react-icons/ri";
 import {  Link } from 'react-router-dom';
+import dayjs from 'dayjs';
 
 function MySurveysTable(props) {
     return <>
@@ -39,7 +40,7 @@ function SurveyRow(props)
         <tr>
         <td>{props.surveyInfo.title}</td>
         <td>{props.surveyInfo.owner}</td>
-        <td>{props.surveyInfo.date.format('dddd, MMMM D, YYYY h:mm A')}</td>
+        <td>{props.surveyInfo.date? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY h:mm A') : ""}</td>
         <td><MyFillInButton surveyId={props.surveyInfo.surveyId}/></td>
       </tr>
   </>

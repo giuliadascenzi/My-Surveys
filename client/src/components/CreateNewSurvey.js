@@ -1,10 +1,8 @@
 import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl, Alert } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { FcSearch, FcPlus } from "react-icons/fc";
 import { FaArrowUp,FaArrowDown } from "react-icons/fa";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import { Link } from 'react-router-dom';
 import { OpenQuestion } from './OpenQuestion.js';
 import { ClosedQuestion } from './ClosedQuestion.js';
 
@@ -14,9 +12,7 @@ function CreateNewSurvey(props) {
     const [errTitle, setErrTitle] =useState(false);
     const [errNumQuestion, setErrNumQuestion] =useState(false);
 
-    const [questions, setQuestions] = useState([{ questionId: 0, surveyId: 0, chiusa: 1, min: 0, max: 3, obbligatoria: -1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
-    { questionId: 1, surveyId:0, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che cosa studi?", answers: "" },
-    { questionId: 2, surveyId:0, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" }]);
+    const [questions, setQuestions] = useState([]);
 
     let history = useHistory();
 
@@ -360,7 +356,6 @@ function AddQuestionButtonModal(props) {
                                         <Form.Control key={"numAnswersCheckbox"}
                                             type="number"
                                             placeholder="Tot"
-                                            id="tot"
                                             key="tot"
                                             value={numAnswers}
                                             isInvalid={((numAnswers > 10) || (numAnswers < 1))}

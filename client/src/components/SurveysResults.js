@@ -1,10 +1,7 @@
 import { Form, Modal, Button, Card, Row, Col} from "react-bootstrap";
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { FcSearch, FcPlus} from "react-icons/fc";
-import {ImClipboard,ImPencil2} from "react-icons/im";
+import {ImClipboard} from "react-icons/im";
 import {AiOutlineArrowLeft, AiOutlineArrowRight}from "react-icons/ai";
-import {  Link } from 'react-router-dom';
 import { OpenQuestion } from './OpenQuestion.js';
 import { ClosedQuestion } from './ClosedQuestion.js';
 
@@ -71,7 +68,7 @@ function CheckResultButton(props)
 }  
 
 function OneSurveyResult(props)
-{
+{  const answers = JSON.parse(props.surveyAnswers.answers);
     return <Card>
 
             <Card.Body>
@@ -85,21 +82,22 @@ function OneSurveyResult(props)
                         </Col>
                     </Form.Group>
                         {/* Questions ordered by increasing questionId below */}
-                        {props.surveyQuestions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
-                                            .map((sQ, sQind) => { console.log(props.surveyAnswers.answers[sQind])
+                        { 
+                        props.surveyQuestions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
+                                            .map((sQ, sQind) => {   
                                                                     if (sQ.chiusa === 1) /* closed Question */
                                                                         return <ClosedQuestion
                                                                             surveyQuestion={sQ}
                                                                             key={sQ.questionId}
                                                                             questionIndex={sQind } 
-                                                                            answer = {props.surveyAnswers.answers[sQind]}
+                                                                            answer = {answers[sQind]}
                                                                             />
                                                                     else                /* open Question */
                                                                         return <OpenQuestion 
                                                                             surveyQuestion={sQ}
                                                                             key={sQ.questionId}
                                                                             questionIndex={sQind} 
-                                                                            answer = {props.surveyAnswers.answers[sQind]}
+                                                                            answer = {answers[sQind]}
                                                                         
                                                                             />
                                                                 })}

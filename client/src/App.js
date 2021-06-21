@@ -6,19 +6,20 @@ import CreateNewSurvey from './components/CreateNewSurvey.js'
 import {LogInForm} from './components/LogInForm.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
-import { useState } from 'react';
-import dayjs from 'dayjs';
+import API from './API';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import dayjs from 'dayjs'
 
 
+/*
 
-
-/* Static data */
+// Static data 
 const sInfo = [{ surveyId: 0, title: "Abitudini culinarie tra gli studenti italiani", owner: "pattidegi", date:dayjs("2021-05-02T09:00:00.000Z") },
 { surveyId: 1, title: "Quanto ne sai sulla raccolta differenziata?", owner: "giuliadash", date:dayjs("2021-06-02T09:00:00.000Z") },
 { surveyId: 2, title: "Come ha modificato la tua vita la pandemia?", owner: "giuliadash", date:dayjs("2021-06-02T09:00:00.000Z") }
 ];
-/*Keys: questionId,surveyId*/
+//Keys: questionId,surveyId
 const sQuestions= [{ questionId: 0, surveyId:0,  chiusa: 1, min:1, max:1, obbligatoria:-1, question: "Quanti anni hai?", answers: "0-10_11-20_21-30_31-40_41+" },
 { questionId: 1, surveyId:0, chiusa: 1, min:1, max:1, obbligatoria:-1, question: "Nazionalità?", answers: "Italia_Spagna_Francia_Norvegia_Altro" },
 { questionId: 3, surveyId:0, chiusa: 1, min:2, max:3, obbligatoria:-1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
@@ -35,29 +36,90 @@ const sAnswers=[{answers: ["1", "1", "ingegneria informatica", "0"], surveyId: 0
 { answers: ["male"], surveyId: 2, user: "giusj"},
 { answers: ["non bene"], surveyId: 2, user: "giulia"},
  ];
-
+*/
 
 function App() {
-  const [surveysInfo, setSurveysInfo] =useState([...sInfo]);
-  const [surveysQuestions, setSurveysQuestions] =useState([...sQuestions]);
-  const [surveysAnswers, setsurveysAnswers] =useState([...sAnswers]);
+  const [surveysInfo, setSurveysInfo] =useState([]);
+  const [surveysQuestions, setSurveysQuestions] =useState([]);
+  const [surveysAnswers, setSurveysAnswers] =useState([]);
   const [loggedIn, setLoggedIn] = useState(false); // at the beginning, no user is logged in
+  const [dirty, setDirty] = useState(true);
 
-  const addFilledInSurvey = (surveyId, answers, user) => {
-    /** function to add a new filled in survey. It's called submitting the fillInSurvey */
+  useEffect(()=> {
+    const getSurveysInfo = async () => {
+      if(true || loggedIn) { //TODO: leva true
+        const surveys = await API.getAllSurveysInfo();
+        setSurveysInfo(surveys);
+        setDirty(false);
+      }
+    };
+    if(dirty)
+      getSurveysInfo()
+      .catch(err => {
+        //setMessage({msg: "Impossible to load your exams! Please, try again later...", type: 'danger'});
+        console.error(err);
+      });
+  }, [dirty, loggedIn]);
+
+  useEffect(()=> {
+    const getSurveysQuestions = async () => {
+      if(true || loggedIn) { //TODO: leva true
+        const surveysQ = await API.getAllSurveysQuestions();
+        setSurveysQuestions(surveysQ);
+        setDirty(false);
+      }
+    };
+    if(dirty)
+      getSurveysQuestions()
+      .catch(err => {
+        //setMessage({msg: "Impossible to load your exams! Please, try again later...", type: 'danger'});
+        console.error(err);
+      });
+  }, [dirty, loggedIn]);
+
+  useEffect(()=> {
+    const getSurveysAnswers = async () => {
+      if(true || loggedIn) { //TODO: leva true
+        const surveysA = await API.getAllSurveysAnswers();
+        setSurveysAnswers(surveysA);
+        setDirty(false);
+      }
+    };
+    if(dirty)
+      getSurveysAnswers()
+      .catch(err => {
+        //setMessage({msg: "Impossible to load your exams! Please, try again later...", type: 'danger'});
+        console.error(err);
+      });
+  }, [dirty, loggedIn]);
+  
+  /*
+  * Function to add a new filled survey in the local data and in the db.
+  */
+  const addFilledSurvey = (surveyId, answers, user) => {
+    /** function to add a new filled  survey. It's called submitting the fillSurvey */
     console.log("[addFilledInSurvey]");
-    const FilledInSurvey = {surveyId: surveyId, answers: answers, user:user};
-    setsurveysAnswers([...surveysAnswers, FilledInSurvey]);
+    const FilledSurvey = {surveyId: surveyId, answers: answers, user:user, status:"added"}; //TODO: Gestire questa roba degli stati
+    setSurveysAnswers([...surveysAnswers, FilledSurvey]);
+
+    API.addFilledSurvey(FilledSurvey)
+      .then(()=> setDirty(true))
+      .catch((err) => console.error(err));
 
   }
 
+  /*
+  * Function to add a new survey in the local data and in the db.
+  */
   const insertNewSurvey = (title, questions, owner) => {
     /** function to add a new  survey. It's called submitting the NewSurvey */
     console.log("[insertNewSurvey]");
     //Insert in sInfo table format = { surveyId: , title: , owner: , date: }
-
+    API.addNewSurvey(title, owner, dayjs().format("YYYY-MM-DD"), questions)
+    .then(()=> setDirty(true))
+    .catch((err) => console.error(err));
     //Insert all the questions in sQuestions, adding in each question the surveyId **TODO**
-    console.log(title, questions, owner);
+    console.log(title,dayjs().format("YYYY-MM-DD"), questions, owner);
 
 
   }
@@ -83,12 +145,15 @@ function App() {
                   
                   <Route path='/survey/:surveyId' render={({match}) =>
                       {
+                      if (loggedIn) //TODO: inserisci il vero nome loggato
+                         return <Redirect to='/home/pattidegi'/>
+                         
                       if (surveysInfo.map(s=>s.surveyId).includes(parseInt(match.params.surveyId)))
                        { 
                         return <FillInSurvey 
                                     surveyInfo={surveysInfo.filter(s=>(s.surveyId==match.params.surveyId))[0]}
                                     surveyQuestions={surveysQuestions.filter(s=>(s.surveyId==match.params.surveyId))}
-                                    addFilledInSurvey = {addFilledInSurvey}
+                                    addFilledSurvey = {addFilledSurvey}
                                ></FillInSurvey>
                       }else
                           return <>Survey Not Found </>
@@ -99,10 +164,11 @@ function App() {
 
 
                   <Route path='/home/:username/newSurvey' render={({match}) =>
-                  /**TODO: check if the user is logged in or not*/
-                      <CreateNewSurvey adminUsername={match.params.username}
+                  { 
+                   /**TODO: check if the user is logged in or not*/
+                    return  <CreateNewSurvey adminUsername={match.params.username}
                                         insertNewSurvey={insertNewSurvey}/>
-                      }>
+                      }}>
                       
                   </Route>
                       
@@ -123,9 +189,12 @@ function App() {
                    </Route>
                  
 
-                  <Route path='/' render={() =>
-                      <MySurveysTable surveysInfo={surveysInfo}></MySurveysTable>
-                      }>
+                  <Route path='/' render={() =>{
+                    if (loggedIn) //TODO: inserisci il vero nome loggato
+                      return <Redirect to='/home/pattidegi'/>
+                    else
+                     return <MySurveysTable surveysInfo={surveysInfo}></MySurveysTable>
+                  }}>
                   </Route>
               
               </Switch>
