@@ -1,6 +1,9 @@
-import { Form, Button, Container} from 'react-bootstrap';
+import { Form, Button, Container, Row} from 'react-bootstrap';
 import { useState } from 'react';
 //import { Redirect } from 'react-router';
+
+
+
 
 function LogInForm(props) {
 
@@ -32,7 +35,7 @@ function LogInForm(props) {
   };
 
   return (
-    <Container fluid style={{width:"50%"}}>
+    <Container fluid style={{width:"100%"}}>
       <Form noValidate validated={validated} onSubmit={handleSubmit} id="log_in_form">
         <Form.Group controlId='username'>
             <Form.Label>Username</Form.Label>
@@ -55,5 +58,44 @@ function LogInForm(props) {
 }
 
 
+function LogOutForm(props) {
 
-export {LogInForm};
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [validated, setValidated] = useState(false);
+  
+  const handleSubmit = (event) => {
+
+    // stop event default and propagation
+    event.preventDefault();
+    event.stopPropagation(); 
+
+    const form = event.currentTarget; 
+
+    // check if form is valid using HTML constraints
+    if (!form.checkValidity()) { 
+        // errors
+        setValidated(true); // enables bootstrap validation error report
+        console.log("no");
+    } else {
+        console.log("si");
+        const credentials = { username, password };
+
+        props.login(credentials);
+    }
+
+    
+  };
+
+  return ( <Container>
+          <Form>
+        <Form.Text as={Row }>Are you sure you want to log out? </Form.Text>
+        <Form.Text as={Row}>Any unsaved work will be lost.</Form.Text>
+       <Button as={Row} variant="success" onClick={props.logout} >Logout</Button>
+       </Form>
+      </Container>
+  )
+}
+
+
+export {LogInForm, LogOutForm};

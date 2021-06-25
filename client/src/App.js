@@ -3,7 +3,7 @@ import MySurveysTable from './components/MySurveysTable.js'
 import FillInSurvey from './components/FillInSurvey.js'
 import AdminHome from './components/AdminHome.js'
 import CreateNewSurvey from './components/CreateNewSurvey.js'
-import {LogInForm} from './components/LogInForm.js'
+import {LogInForm, LogOutForm} from './components/LogForms.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
 import API from './API';
@@ -44,6 +44,7 @@ function App() {
   const [surveysAnswers, setSurveysAnswers] =useState([]);
   const [loggedIn, setLoggedIn] = useState(false); // at the beginning, no user is logged in
   const [dirty, setDirty] = useState(true);
+  const [showLogModal, setShowLogModal] = useState(false)
 
   useEffect(()=> {
     const getSurveysInfo = async () => {
@@ -139,7 +140,7 @@ function App() {
         
         <Router>
             <title>My Online Surveys</title>
-            <MyNavbar loggedIn={loggedIn} doLogOut={doLogOut}/>
+            <MyNavbar loggedIn={loggedIn} doLogOut={doLogOut} doLogIn={doLogIn}/>
 
                 <Switch>
                   
@@ -183,11 +184,15 @@ function App() {
                       }>
                   </Route>
                       
-
+{/** 
                   <Route path="/login" render={() =>
                     loggedIn ? <Redirect to="/" /> : <LogInForm login={doLogIn}/>}>
                    </Route>
-                 
+
+                  <Route path="/logout" render = {() =>
+                    loggedIn ? <LogOutForm logout={doLogOut} /> : <Redirect to="/" />}>
+                   </Route>
+  */}               
 
                   <Route path='/' render={() =>{
                     if (loggedIn) //TODO: inserisci il vero nome loggato
