@@ -1,15 +1,15 @@
-import { Table, Row, Button} from "react-bootstrap";
+import { Table, Row, Button, Container} from "react-bootstrap";
 import { RiSurveyLine} from "react-icons/ri";
 import {  Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 
 function MySurveysTable(props) {
     return <>
-
-    <Row className="p-3" as="h5">
+    <Container fluid className="p-4">
+    <Row as="h6" className="font-weight-bold">
         In the following table are shown all the available surveys:
     </Row>
-    
+    </Container>
     <Table bordered variant="light" >
     <thead id="table_header">
       <tr >

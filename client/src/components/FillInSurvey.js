@@ -1,4 +1,4 @@
-import { Card, Form, Row, Col, Button, Alert } from "react-bootstrap";
+import { Card, Form, Row, Col, Button, Alert, Container } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { OpenQuestion } from './OpenQuestion.js';
@@ -60,12 +60,12 @@ function FillInSurvey(props) {
 
       };
 
-    return (<>
+    return (<Container id="survey_container">
         <Card>
 
             <Card.Header className="text-center">
                 {/*Title of the survey */}
-                <Card.Title>"{props.surveyInfo.title}"</Card.Title> 
+                <Card.Title className="font-weight-bold">"{props.surveyInfo.title}"</Card.Title> 
                 {/*Owner of the survey */}
                 <Card.Subtitle>Survey by {props.surveyInfo.owner}</Card.Subtitle> 
             </Card.Header>
@@ -75,7 +75,7 @@ function FillInSurvey(props) {
                 <Form noValidate validated={validated} onSubmit={handleSubmit} id="filled_survey">
                     <Form.Group as={Row} controlId="surveyForm" >
                         {/* Input label for the user name*/}
-                        <Form.Label column sm="2" className="insertName">Write here your name:</Form.Label>
+                        <Form.Label column sm="4" >Write here your name:</Form.Label>
                         <Col sm="4">
                             <Form.Control type="username" placeholder="Enter name"  required onChange = {(event)=> setUser(event.target.value)}/>
                             <Form.Control.Feedback type="invalid">
@@ -87,17 +87,21 @@ function FillInSurvey(props) {
                         {props.surveyQuestions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
                                               .map((sQ, sQind) => {
                                                                     if (sQ.chiusa) /* closed Question */
-                                                                        return <ClosedQuestion
-                                                                            surveyQuestion={sQ}
-                                                                            key={sQ.questionId}
-                                                                            questionIndex={sQind } 
-                                                                            setAnswer={setAnswer}/>
+                                                                        return <Container fluid id="questionRow" key={sQ.questionId}>
+                                                                                    <ClosedQuestion
+                                                                                    surveyQuestion={sQ}
+                                                                                    key={sQ.questionId}
+                                                                                    questionIndex={sQind } 
+                                                                                    setAnswer={setAnswer}/> 
+                                                                            </Container>
                                                                     else                /* open Question */
-                                                                        return <OpenQuestion 
-                                                                            surveyQuestion={sQ}
-                                                                            key={sQ.questionId}
-                                                                            questionIndex={sQind} 
-                                                                            setAnswer={setAnswer}/>
+                                                                        return <Container fluid id="questionRow" key={sQ.questionId}>
+                                                                                    <OpenQuestion 
+                                                                                    surveyQuestion={sQ}
+                                                                                    key={sQ.questionId}
+                                                                                    questionIndex={sQind} 
+                                                                                    setAnswer={setAnswer}/>
+                                                                              </Container>
                                                                 })}
 
                     
@@ -111,11 +115,11 @@ function FillInSurvey(props) {
                     {errMessage.length!=0? <Alert variant="danger">{errMessage}</Alert> : <></>}
             </Card.Footer>
         </Card>
+        </Container>
 
 
 
 
-    </>
 
     );
 

@@ -1,17 +1,18 @@
-import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl, Alert } from "react-bootstrap";
+import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl, Alert, TabContainer } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { FaArrowUp,FaArrowDown } from "react-icons/fa";
+import { FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { OpenQuestion } from './OpenQuestion.js';
 import { ClosedQuestion } from './ClosedQuestion.js';
+import { IoIosReturnLeft, IoIosWarning } from "react-icons/io";
 
 
 function CreateNewSurvey(props) {
     const [title, setTitle] = useState("");
-    const [errTitle, setErrTitle] =useState(false);
-    const [errNumQuestion, setErrNumQuestion] =useState(false);
-    const [errMessage, setErrMessage] =useState("");
+    const [errTitle, setErrTitle] = useState(false);
+    const [errNumQuestion, setErrNumQuestion] = useState(false);
+    const [errMessage, setErrMessage] = useState("");
 
     const [questions, setQuestions] = useState([]);
 
@@ -26,72 +27,68 @@ function CreateNewSurvey(props) {
         setQuestions([...questions, question]);
     }
 
-    const handleQuestionMoveUp = (index) =>
-    {
-       //The question up need to go down and the question at index need to go at sQind-1
-       const data=[...questions];
-       data[index].questionId = index-1;
-       data[index-1].questionId = index;
-       setQuestions(data.sort((sq1, sq2) => sq1.questionId - sq2.questionId));
+    const handleQuestionMoveUp = (index) => {
+        //The question up need to go down and the question at index need to go at sQind-1
+        const data = [...questions];
+        data[index].questionId = index - 1;
+        data[index - 1].questionId = index;
+        setQuestions(data.sort((sq1, sq2) => sq1.questionId - sq2.questionId));
 
     }
-    const handleQuestionMoveDown = (index) =>
-    {
+    const handleQuestionMoveDown = (index) => {
         //The question down need to go up and the question at position [index] need to down at sQind-1
-        const data=[...questions];
-        data[index].questionId = index+1;
-        data[index+1].questionId = index; 
+        const data = [...questions];
+        data[index].questionId = index + 1;
+        data[index + 1].questionId = index;
         console.log(data.sort((sq1, sq2) => sq1.questionId - sq2.questionId))
         setQuestions(data.sort((sq1, sq2) => sq1.questionId - sq2.questionId));
     }
 
-    const handleRemoveQuestion = (sQind) =>
-    {   
+    const handleRemoveQuestion = (sQind) => {
         const data = [...questions]
         data.splice(sQind, 1)
-        for (let i=0; i<data.length; i++)
-        {
-            data.questionId=i;
+        for (let i = 0; i < data.length; i++) {
+            data.questionId = i;
         }
         setQuestions(data);
     }
 
-    const handleTitleChange= (event) =>
-    {
+    const handleTitleChange = (event) => {
         setTitle(event.target.value)
-        setErrTitle(event.target.value.trim().length==0)
+        setErrTitle(event.target.value.trim().length == 0)
         setErrMessage("");
     }
-    const handleSubmitNewSurvey =(event) =>{
+    const handleSubmitNewSurvey = (event) => {
         event.preventDefault();
         //Check that the title has been inserted and that there is at least one question inserted
         if (errTitle) {
-            setErrMessage("Can not submit until there are errors in the form")
-            return;}
-        if (title.trim().length==0) 
-            {   setErrMessage("Can not submit until there are errors in the form")
-                setErrTitle(true);
-                return;
-            }
-        if (questions.length<1)
-         {
-             setErrNumQuestion(true)
-             setErrMessage("Can not submit until there are errors in the form")
-         return;}
-        
+            setErrMessage("Errors to fix")
+            return;
+        }
+        if (title.trim().length == 0) {
+            setErrMessage("Errors to fix")
+            setErrTitle(true);
+            return;
+        }
+        if (questions.length < 1) {
+            setErrNumQuestion(true)
+            setErrMessage("Errors to fix")
+            return;
+        }
+
         //All good here, submit the survey
         props.insertNewSurvey(title, questions, props.adminUsername);
 
         history.goBack()
     }
 
-    return <Container>
+    return <Container id="survey_container">
         <Card>
             <Card.Header >
                 {/*Title of the survey */}
-                <Card.Title className="text-center" >New Survey</Card.Title>
+                <Card.Title as="h3" className="text-center font-weight-bold" >New Survey</Card.Title>
                 <Row>
-                    <Form.Label column sm="2"  className="insertTitle">Title:</Form.Label>
+                    <Form.Label column sm="2" className="font-weight-bold" >Title:</Form.Label>
                     <Col sm="8">
                         <Form.Control type="title" isInvalid={errTitle} placeholder="Enter title" onChange={handleTitleChange} />
                         <Form.Control.Feedback type="invalid">
@@ -104,72 +101,78 @@ function CreateNewSurvey(props) {
 
             <Card.Body>
 
-                <>Questions: </>
-                { errNumQuestion? <Alert variant="danger">Insert at least one question to submit the survey</Alert> : <></>}
+                <Container fluid id="new_survey_questions" className="ps-15">
 
-                {questions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
-                    .map((sQ, sQind) => {
-                        return <QuestionRow key={sQind} 
-                                            sQ={sQ} sQind={sQind} 
-                                            questions={questions} 
-                                            handleQuestionMoveUp={handleQuestionMoveUp} 
-                                            handleQuestionMoveDown={handleQuestionMoveDown} 
-                                            handleRemoveQuestion={handleRemoveQuestion}/>
+                    <Row as="h6" className="font-weight-bold">Questions: </Row>
+                    {errNumQuestion ? <Row as="h8" className="text-danger font-weight-bold">Insert at least one question!</Row>
+                         : <Row as="h8">Insert at least one question</Row>}
+    
 
-                    })}
+                    {questions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
+                        .map((sQ, sQind) => {
+                            return <QuestionRow key={sQind}
+                                sQ={sQ} sQind={sQind}
+                                questions={questions}
+                                handleQuestionMoveUp={handleQuestionMoveUp}
+                                handleQuestionMoveDown={handleQuestionMoveDown}
+                                handleRemoveQuestion={handleRemoveQuestion} />
 
-                <Row>
-                    <AddQuestionModal submitQuestion={handleAddQuestion} />
-                </Row>
+                        })}
+
+                    <Row>
+                        <AddQuestionModal submitQuestion={handleAddQuestion} />
+                    </Row>
+                </Container>
 
             </Card.Body>
-            <Card.Footer>
-
-                {/* submit button */}
-                <Button variant="info"  className="btn btn-success btn-lg " onClick={handleSubmitNewSurvey} >
-                    Submit the survey
-                </Button>
-                {errMessage.length!=0? <Alert variant="danger">{errMessage}</Alert> : <></>}
-                {/**TODO ADD a discard buytton?? */}
-
-
-            </Card.Footer>
         </Card>
 
-    </Container>
+        <Container fluid id="new_Survey_footer">
+            
+                    {/* submit button */}
+                    <Button variant="custom" size="lg" onClick={handleSubmitNewSurvey} >
+                        Submit the survey
+                    </Button>
+                    {errMessage.length != 0 ? <IoIosWarning fill="red" size="40" className="mx-4"/> : <></>}
+                
+        </Container >
+
+
+
+
+    </Container >
 }
 
-function QuestionRow(props)
-{
-   return <> <Container fluid id="questionRow"><Row >
-                            <Col sm="10">
-                                {props.sQ.chiusa ? /* closed Question */
-                                    <ClosedQuestion
-                                        surveyQuestion={props.sQ}
-                                        key={"question" + props.sQind}
-                                        questionIndex={props.sQind} />
+function QuestionRow(props) {
+    return <> <Container fluid id="questionRow" key={props.sQind}><Row >
+        <Col sm="10">
+            {props.sQ.chiusa ? /* closed Question */
+                <ClosedQuestion
+                    surveyQuestion={props.sQ}
+                    key={"question" + props.sQind}
+                    questionIndex={props.sQind} />
 
-                                    : <OpenQuestion
-                                        surveyQuestion={props.sQ}
-                                        key={"question" + props.sQind}
-                                        questionIndex={props.sQind}
-                                    />}
+                : <OpenQuestion
+                    surveyQuestion={props.sQ}
+                    key={"question" + props.sQind}
+                    questionIndex={props.sQind}
+                />}
 
-                            </Col>
-                            <Col id="bottoni" >
-                                <Button key={"buttonUp"+props.sQind} variant="outline-secondary" disabled={props.sQind==0} onClick={()=> props.handleQuestionMoveUp(props.sQind)}>
-                                    <FaArrowUp fill="black"/>
-                                </Button>
-                                <Button  key={"buttonDown"+props.sQind} variant="outline-secondary" disabled={props.sQind==props.questions.length-1} onClick={()=> props.handleQuestionMoveDown(props.sQind)}>
-                                    <FaArrowDown fill="black"/>
-                                </Button>
-                                <Button  key={"remove"+props.sQind} variant="outline-secondary"onClick={()=> props.handleRemoveQuestion(props.sQind)}>
-                                    <RiDeleteBin5Fill fill="black"/>
-                                </Button>
-                            </Col>
-                        </Row>
-                        </Container>
-                        </>
+        </Col>
+        <Col id="bottoni" >
+            <Button key={"buttonUp" + props.sQind} variant="outline-secondary" disabled={props.sQind == 0} onClick={() => props.handleQuestionMoveUp(props.sQind)}>
+                <FaArrowUp fill="black" />
+            </Button>
+            <Button key={"buttonDown" + props.sQind} variant="outline-secondary" disabled={props.sQind == props.questions.length - 1} onClick={() => props.handleQuestionMoveDown(props.sQind)}>
+                <FaArrowDown fill="black" />
+            </Button>
+            <Button key={"remove" + props.sQind} variant="outline-secondary" onClick={() => props.handleRemoveQuestion(props.sQind)}>
+                <RiDeleteBin5Fill fill="black" />
+            </Button>
+        </Col>
+    </Row>
+    </Container>
+    </>
 }
 
 function AddQuestionModal(props) {
@@ -273,24 +276,27 @@ function AddQuestionModal(props) {
         //check errors
 
         if ((numAnswers > 10) || (numAnswers < 1) || (max > numAnswers) || (max < min) || (min < 0)) //One or more fields invalid
-        {   setErrMessage("Can not add the question until there are errors in the form")
+        {
+            setErrMessage("Errors to fix")
             return;
         }
         if (questionText.trim().length == 0) //Text of the question missing
-        {   setErrMessage("Can not add the question until there are errors in the form")
+        {
+            setErrMessage("Errors to fix")
             setErrText(true);
             return;
         }
 
         if (chiusa && errPossibleAnswers.filter(err => err == true).length != 0) //one of the answers has not been filled in
-        {   setErrMessage("Can not add the question until there are errors in the form")
+        {
+            setErrMessage("Errors to fix")
             return
         }
 
 
         //Question format: { questionId: , surveyId:, chiusa: , min:, max:, obbligatoria:, question: , answers: },
         //surveyId and questionId will be set from the component above.
-        const newQuestion = { questionId: -1, surveyId: -1, chiusa: (chiusa? 1 : 0), min: min, max: max, obbligatoria: (obbligatoria? 1:0), question: questionText, answers: possibleAnswers.join("_") }
+        const newQuestion = { questionId: -1, surveyId: -1, chiusa: (chiusa ? 1 : 0), min: min, max: max, obbligatoria: (obbligatoria ? 1 : 0), question: questionText, answers: possibleAnswers.join("_") }
         props.submitQuestion(newQuestion);
         handleClose();
     }
@@ -307,12 +313,12 @@ function AddQuestionModal(props) {
 
 
     return <>
-        <Button variant="success" size="lg" className="fixed-left-bottom" onClick={handleShow}>
+        <Button variant="success" size="lg" onClick={handleShow}>
             + Add question
         </Button>
         <Modal size="lg" show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>New Question</Modal.Title>
+                <Modal.Title className="font-weight-bold">NEW QUESTION</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {/** CHOOSE BETWEEN CLOSE AND OPEN */}
@@ -466,7 +472,7 @@ function AddQuestionModal(props) {
                         </>
 
                 }
-                {errMessage.length!=0? <Alert variant="danger">{errMessage}</Alert> : <></>}
+                {errMessage.length != 0 ? <Alert  variant="danger">{errMessage}</Alert> : <></>}
 
             </Modal.Body>
 

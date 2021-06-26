@@ -8,6 +8,16 @@
     width: 75% !important; 
  }
 
+ #survey_container
+ {
+  width: 75% !important; 
+  padding-top: 15px;
+  padding-bottom: 15px; }
+
+ #new_Survey_footer
+ {
+  padding-top: 15px;
+ }
 /* Global */
 .vheight-100 {
   min-height: 100vh;
@@ -31,7 +41,7 @@
 #log_button
 {
     color: #212529;
-    background-color:#cbe4ff;
+    background-color:#a3c8f0;
     border-color: #001831;
 }
 

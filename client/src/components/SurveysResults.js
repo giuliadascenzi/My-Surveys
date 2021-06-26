@@ -1,4 +1,4 @@
-import { Form, Modal, Button, Card, Row, Col} from "react-bootstrap";
+import { Form, Modal, Button, Card, Row, Col, Container} from "react-bootstrap";
 import { useState } from 'react';
 import {ImClipboard} from "react-icons/im";
 import {AiOutlineArrowLeft, AiOutlineArrowRight}from "react-icons/ai";
@@ -26,8 +26,8 @@ function SurveysResults(props)
         <CheckResultButton handleShow={handleShow}/>
         
         <Modal size="lg" show={show} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>"{props.surveyInfo.title}"</Modal.Title>
+          <Modal.Header closeButton className="text-center">
+            <Modal.Title className="font-weight-bold">"{props.surveyInfo.title}"</Modal.Title>
           </Modal.Header>
           <Modal.Body>
               <OneSurveyResult
@@ -86,20 +86,22 @@ function OneSurveyResult(props)
                         props.surveyQuestions.sort((sq1, sq2) => sq1.questionId - sq2.questionId)
                                             .map((sQ, sQind) => {   
                                                                     if (sQ.chiusa === 1) /* closed Question */
-                                                                        return <ClosedQuestion
-                                                                            surveyQuestion={sQ}
-                                                                            key={sQ.questionId}
-                                                                            questionIndex={sQind } 
-                                                                            answer = {answers[sQind]}
-                                                                            />
+                                                                        return <Container fluid id="questionRow" key={sQ.questionId}>
+                                                                            <ClosedQuestion
+                                                                                surveyQuestion={sQ}
+                                                                                key={sQ.questionId}
+                                                                                questionIndex={sQind } 
+                                                                                answer = {answers[sQind]}
+                                                                                /></Container>
                                                                     else                /* open Question */
-                                                                        return <OpenQuestion 
-                                                                            surveyQuestion={sQ}
-                                                                            key={sQ.questionId}
-                                                                            questionIndex={sQind} 
-                                                                            answer = {answers[sQind]}
+                                                                        return <Container fluid id="questionRow" key={sQ.questionId}>
+                                                                            <OpenQuestion 
+                                                                              surveyQuestion={sQ}
+                                                                              key={sQ.questionId}
+                                                                              questionIndex={sQind} 
+                                                                              answer = {answers[sQind]}
                                                                         
-                                                                            />
+                                                                            /></Container>
                                                                 })}
 
                     
