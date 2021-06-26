@@ -38,10 +38,10 @@ exports.getAllSurveysQuestions= () => {
     });
 };
 
-exports.getAllSurveysAnswers= () => {
+exports.getAdminSurveysAnswers= (admin) => {
     return new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM S_ANSWERS';
-        db.all(sql, (err, rows) => {
+        const sql = 'SELECT A.surveyId, A.user, A.answers FROM S_ANSWERS as A,S_INFO as I WHERE I.surveyId = A.surveyId AND I.owner=?';
+        db.all(sql,[admin], (err, rows) => {
             if (err)
                 reject(err);
             else {

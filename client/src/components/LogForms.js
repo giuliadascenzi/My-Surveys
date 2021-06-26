@@ -52,7 +52,7 @@ function LogInForm(props) {
                 Invalid number of digits
             </Form.Control.Feedback>
         </Form.Group>
-        <Button variant="success" type="submit" form="log_in_form">Login</Button>
+        <Button variant="custom" type="submit" form="log_in_form">Login</Button>
       </Form>
     </Container>)
 }
@@ -76,11 +76,8 @@ function LogOutForm(props) {
     if (!form.checkValidity()) { 
         // errors
         setValidated(true); // enables bootstrap validation error report
-        console.log("no");
     } else {
-        console.log("si");
         const credentials = { username, password };
-
         props.login(credentials);
     }
 
@@ -91,7 +88,7 @@ function LogOutForm(props) {
           <Form>
         <Form.Text as={Row }>Are you sure you want to log out? </Form.Text>
         <Form.Text as={Row}>Any unsaved work will be lost.</Form.Text>
-       <Button as={Row} variant="success" onClick={props.logout} >Logout</Button>
+       <Button as={Row} variant="custom" onClick={props.logout} >Logout</Button>
        </Form>
       </Container>
   )

@@ -1,4 +1,4 @@
-import { Card, Form, Row, Col, Button } from "react-bootstrap";
+import { Card, Form, Row, Col, Button, Alert } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { OpenQuestion } from './OpenQuestion.js';
@@ -17,7 +17,7 @@ function FillInSurvey(props) {
     const [answers, setAnswers] =useState([...data]);
     const [validated, setValidated] = useState(false);
     const [user, setUser] = useState("");
-   
+    const [errMessage, setErrMessage] = useState("");
 
 
     const setAnswer = (answerIndex, answer) => 
@@ -47,6 +47,10 @@ function FillInSurvey(props) {
         if (!form.checkValidity()) { 
             // errors
             setValidated(true); // enables bootstrap validation error report
+            setErrMessage("Resolve errors before submitting")
+            setTimeout(() => { 
+                setErrMessage("")
+            }, 2000);
         } else {
             // submit the answers
             props.addFilledSurvey(props.surveyInfo.surveyId, answers, user);
@@ -104,7 +108,7 @@ function FillInSurvey(props) {
                 
                     {/* submit button */}
                     <SubmitButton />
-                
+                    {errMessage.length!=0? <Alert variant="danger">{errMessage}</Alert> : <></>}
             </Card.Footer>
         </Card>
 

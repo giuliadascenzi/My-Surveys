@@ -5,21 +5,22 @@ import dayjs from 'dayjs';
 
 function MySurveysTable(props) {
     return <>
-    <Row className="px-3">
+
+    <Row className="p-3" as="h5">
         In the following table are shown all the available surveys:
     </Row>
     
-    <Table striped  >
-    <thead>
-      <tr>
+    <Table bordered variant="light" >
+    <thead id="table_header">
+      <tr >
         <th>Survey title</th>
         <th>Owner</th>
         <th>Date</th>
-        <th>    </th>
+        <th>Fill in the survey</th>
 
       </tr>
     </thead>
-    <tbody>
+    <tbody id="table_body">
       {
         props.surveysInfo.map( s =>  <SurveyRow surveyInfo={s}
                                                 key={s.surveyId}/>)
@@ -40,7 +41,7 @@ function SurveyRow(props)
         <tr>
         <td>{props.surveyInfo.title}</td>
         <td>{props.surveyInfo.owner}</td>
-        <td>{props.surveyInfo.date? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY h:mm A') : ""}</td>
+        <td>{props.surveyInfo.date? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY') : ""}</td>
         <td><MyFillInButton surveyId={props.surveyInfo.surveyId}/></td>
       </tr>
   </>
@@ -51,7 +52,7 @@ function SurveyRow(props)
 function MyFillInButton(props)
 {
     return <Link to={"/survey/"+ props.surveyId}>
-              <Button variant="outline-secondary" >
+              <Button variant="outline-custom" >
                   <RiSurveyLine
                     size="20"
                     fill="black"

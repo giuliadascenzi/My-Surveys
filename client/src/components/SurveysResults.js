@@ -59,7 +59,7 @@ function SurveysResults(props)
       /*Clicking on this button the user gets redirect to the page where he/she can fill in the selected survey*/
 function CheckResultButton(props)
 {
-    return <Button variant="outline-secondary" onClick={props.handleShow}>
+    return <Button variant="outline-custom" onClick={props.handleShow}>
                   <ImClipboard
                     size="20"
                     fill="black"

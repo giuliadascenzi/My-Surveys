@@ -1,4 +1,4 @@
-import { Table, Row, Button, Container,Alert } from "react-bootstrap";
+import { Table, Row, Button, Container,Col } from "react-bootstrap";
 import dayjs from 'dayjs';
 import {ImPencil2} from "react-icons/im";
 import {  Link } from 'react-router-dom';
@@ -13,7 +13,7 @@ import SurveysResults from "./SurveysResults";
 function AdminHome(props)
 {
     return <Container fluid>
-            <Alert variant="success">Hello, {props.adminUsername}. Welcome back!</Alert>
+            <h4 className="py-3 font-weight-bold">Hello, {props.adminUsername}. Welcome back!</h4>
             <AdminResults surveysInfo={props.surveysInfo} 
                           surveysQuestions={props.surveyQuestions} 
                           surveysAnswers={props.surveysAnswers}
@@ -26,22 +26,22 @@ function AdminHome(props)
 function AdminResults(props)
 {
     return <>
-    <Row className="px-3">
+    <h6 className="py-2">
         In the following table are shown all the surveys you have created so far:
-    </Row>
+    </h6>
     
-    <Table striped  >
-    <thead>
+    <Table bordered variant="light">
+    <thead id="table_header">
       <tr>
         <th>Survey title</th>
         <th>Date</th>
         <th>Number of answers</th>
-        <th>Results        </th>
+        <th>Check the results</th>
 
 
       </tr>
     </thead>
-    <tbody>
+    <tbody id="table_body">
       {
         props.surveysInfo.map( s =>  <ResultsRow surveyInfo={s}
                                                  key={s.surveyId}
@@ -55,15 +55,19 @@ function AdminResults(props)
 }
 
 function ResultsRow(props)
-{  //TODO: disabilita il tasto in caso le risposte non sono almeno 1 o sfancula
+{  
+    const numAnswers= props.surveysAnswers.filter(s => s.surveyId==props.surveyInfo.surveyId).length
     return <>
     <tr>
     <td>{props.surveyInfo.title}</td>
-    <td>{props.surveyInfo.date? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY h:mm A') : ""}</td>
-    <td>{props.surveysAnswers.filter(s => s.surveyId==props.surveyInfo.surveyId).length}</td>
-    <td><SurveysResults surveyQuestions={props.surveysQuestions.filter(s => s.surveyId == props.surveyInfo.surveyId)}
+    <td>{props.surveyInfo.date? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY') : ""}</td>
+    <td>{numAnswers}</td>
+    <td>{numAnswers>0? //Show results only if there are any
+                <SurveysResults surveyQuestions={props.surveysQuestions.filter(s => s.surveyId == props.surveyInfo.surveyId)}
                         surveyAnswers={props.surveysAnswers.filter(s => s.surveyId == props.surveyInfo.surveyId)}
-                        surveyInfo={props.surveyInfo}/></td>
+                        surveyInfo={props.surveyInfo}/> 
+                : <></>} 
+         </td>
   </tr>
 </>
 }
@@ -73,18 +77,25 @@ function ResultsRow(props)
 
 function CreateNewSurvey(props)
 {  
-    return <>
-            <>Create a new survey: </>
+    return <Container fluid className="justify-content-start p-0">
+           <Row className="py-4">
+             <Col sm={3} >
+            <h6 > Click here if you want to create a new survey: </h6>
+            </Col>
+            <Col >
               <Link to={props.adminUsername+"/NewSurvey"}>
-                  <Button variant="outline-secondary" >
+                  <Button size="md" variant="outline-custom" >
                           <ImPencil2
                             size="20"
                             fill="black"
+                            className="mx-2 my-0 "
                           ></ImPencil2>
                       New survey
                   </Button>
               </Link>
-          </>
+              </Col>
+          </Row>
+          </Container>
         }
     
 export default AdminHome;

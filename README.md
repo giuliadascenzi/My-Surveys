@@ -48,5 +48,5 @@ TODO:
 
 ## Users Credentials
 
-- username, password (plus any other requested info)
-- username, password (plus any other requested info)
+- username, password (plus any other requested info)  pattidegi | walter123
+- username, password (plus any other requested info)  giuliadash | ciaociao123

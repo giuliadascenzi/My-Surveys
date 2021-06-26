@@ -1,4 +1,4 @@
-import { Navbar, Button, Nav, OverlayTrigger, Popover } from "react-bootstrap";
+import { Navbar, Button, Nav, OverlayTrigger, Popover, Container } from "react-bootstrap";
 import { BsBoxArrowInLeft, BsBoxArrowInRight, BsFillQuestionSquareFill} from "react-icons/bs";
 import { Link } from 'react-router-dom';
 import { LogInForm, LogOutForm } from "./LogForms";
@@ -15,32 +15,19 @@ function MyLogInButton(props)
 );
 
   return <OverlayTrigger trigger="click" placement="bottom" overlay={popover} rootClose={true}>
-            <Button variant="warning">
+            <Button size="lg"id="log_button">
               <BsBoxArrowInRight
-                  className="ml-3"
                   size= "30"
                   fill="black"
+                  className = "pe-3"
               /> 
-            Log in as administrator
+             Log in 
           </Button>
         </OverlayTrigger>
 }
 
 
 
-function MyLogInButton2(props)
-{
-  return <Link to="/login">
-            <Button variant="warning">
-              <BsBoxArrowInRight
-                  className="ml-3"
-                  size= "30"
-                  fill="black"
-              /> 
-            Log in as administrator
-          </Button>
-        </Link>
-}
 
 
 function MyLogOutButton(props) {
@@ -54,9 +41,8 @@ function MyLogOutButton(props) {
   );
   
   return <OverlayTrigger trigger="click" placement="bottom" overlay={popover} rootClose={true} >
-          <Button variant="warning">
+          <Button size="lg" id="log_button">
           <BsBoxArrowInLeft
-              className="ml-3"
               size= "30"
               fill="black"
         />
@@ -70,20 +56,21 @@ function MyNavbar(props) {
   /* Navbar */
   return (
 <>
-
-    <Navbar bg="warning" variant="light" >
-      { /* <Navbar.Toggle aria-controls="left-sidebar" onClick={this.showSidebar}/> 
-      <Navbar.Toggle aria-controls="left-sidebar"/>*/}
+  <Container fluid id="navbar_container">
+    <Navbar bg="warning" variant="dark"  id="navbar">
       <Navbar.Brand href="/" className="col-9">
-        <BsFillQuestionSquareFill className="mr-1 px-1" size="30" /> My Online Surveys
+        <BsFillQuestionSquareFill className="mr-1" className="border-dark" size="35" fill="white"/> My Online Surveys
       </Navbar.Brand>
       
       <Nav className="col-3">
+      <Container fluid className="justify-content-md-end">
         <Nav.Item >
           {props.loggedIn? <MyLogOutButton logout={props.doLogOut}/> : <MyLogInButton login={props.doLogIn}/>}
         </Nav.Item>
+        </Container>
       </Nav>
     </Navbar>
+  </Container>
   
 </>
   );

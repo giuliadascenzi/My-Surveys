@@ -13,9 +13,40 @@
   min-height: 100vh;
 }
 
-
+/*My Navbar*/
 .below-nav {
   padding-top: 5rem;
+}
+
+#navbar
+{
+  background-color: #0667d0!important;
+}
+#navbar_container
+{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+#log_button
+{
+    color: #212529;
+    background-color:#cbe4ff;
+    border-color: #001831;
+}
+
+/*My survey table*/
+#table_header
+{
+  color: #212529;
+    background-color: #51a2f8;
+    border-color: #001831;
+}
+#table_body
+{
+    color: #212529;
+    background-color: #a9d3ff96;
+    border-color: #001831;
 }
 
 .form-label
@@ -42,4 +73,34 @@ border-width: 1px;
 #bottoni{
   margin-top: 10px;
 margin-left: 10px;
+}
+
+.btn-custom
+{
+  
+    color: #fcfdfd;
+    background-color: #096eda;
+    border-color: #003874; 
+}
+
+.btn-custom:hover
+{
+  
+    color: #212529;
+    background-color:#51a2f8;
+    border-color: #003874; 
+}
+
+.btn-outline-custom
+{
+  color: #212529;
+  background-color:transparent;
+  border-color: #003874; 
+}
+
+.btn-outline-custom:hover
+{
+  color: #212529;
+  background-color:#51a2f8;
+  border-color: #003874; 
 }

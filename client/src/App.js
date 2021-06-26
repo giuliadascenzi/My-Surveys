@@ -39,20 +39,34 @@ const sAnswers=[{answers: ["1", "1", "ingegneria informatica", "0"], surveyId: 0
 */
 
 function App() {
-  const [surveysInfo, setSurveysInfo] =useState([]);
+  const [surveysInfo, setSurveysInfo] =useState([]); 
   const [surveysQuestions, setSurveysQuestions] =useState([]);
-  const [surveysAnswers, setSurveysAnswers] =useState([]);
+  const [adminSurveysAnswers, setAdminSurveysAnswers] =useState([]);
   const [loggedIn, setLoggedIn] = useState(false); // at the beginning, no user is logged in
   const [dirty, setDirty] = useState(true);
   const [showLogModal, setShowLogModal] = useState(false)
+  const [user, setUser] = useState(null);
 
+  // check if user is authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // here you have the user info, if already logged in
+        const user = await API.getUserInfo();
+        setUser(user);
+        setLoggedIn(true);
+      } catch (err) {
+        console.log(err.error); // mostly unauthenticated user
+      }
+    };
+    checkAuth();
+  }, []);
+  
   useEffect(()=> {
     const getSurveysInfo = async () => {
-      if(true || loggedIn) { //TODO: leva true
         const surveys = await API.getAllSurveysInfo();
         setSurveysInfo(surveys);
         setDirty(false);
-      }
     };
     if(dirty)
       getSurveysInfo()
@@ -64,11 +78,10 @@ function App() {
 
   useEffect(()=> {
     const getSurveysQuestions = async () => {
-      if(true || loggedIn) { //TODO: leva true
         const surveysQ = await API.getAllSurveysQuestions();
         setSurveysQuestions(surveysQ);
         setDirty(false);
-      }
+
     };
     if(dirty)
       getSurveysQuestions()
@@ -80,9 +93,9 @@ function App() {
 
   useEffect(()=> {
     const getSurveysAnswers = async () => {
-      if(true || loggedIn) { //TODO: leva true
-        const surveysA = await API.getAllSurveysAnswers();
-        setSurveysAnswers(surveysA);
+      if(loggedIn) {
+        const surveysA = await API.getAdminSurveysAnswers();
+        setAdminSurveysAnswers(surveysA);
         setDirty(false);
       }
     };
@@ -100,8 +113,8 @@ function App() {
   const addFilledSurvey = (surveyId, answers, user) => {
     /** function to add a new filled  survey. It's called submitting the fillSurvey */
     console.log("[addFilledInSurvey]");
-    const FilledSurvey = {surveyId: surveyId, answers: answers, user:user, status:"added"}; //TODO: Gestire questa roba degli stati
-    setSurveysAnswers([...surveysAnswers, FilledSurvey]);
+    const FilledSurvey = {surveyId: surveyId, answers: answers, user:user, status:"added"}; //TODO: Gestire questa roba degli stati!
+    setAdminSurveysAnswers([...adminSurveysAnswers, FilledSurvey]); //TODO: se non è dell'amministratore non va fatto!!!
 
     API.addFilledSurvey(FilledSurvey)
       .then(()=> setDirty(true))
@@ -126,13 +139,28 @@ function App() {
   }
 
   const doLogIn = async (credentials) => {
-    console.log("logged in")
-    setLoggedIn(true);
+    try {
+      const user = await API.logIn(credentials);
+      setUser(user);
+      setLoggedIn(true);
+      setDirty(true)
+    }
+    catch (err) {
+      // error is handled and visualized in the login form, do not manage error, throw it
+      // handleErrors(err)
+      throw err;
+    }
   }
 
   const doLogOut = async () => {
-    console.log("logged out")
+    await API.logOut()
+    // clean up everything
     setLoggedIn(false);
+    setUser(null);
+    setSurveysInfo([]);
+    setSurveysQuestions([]);
+    setAdminSurveysAnswers([]);
+    setDirty(true);
 
   }
   
@@ -146,8 +174,8 @@ function App() {
                   
                   <Route path='/survey/:surveyId' render={({match}) =>
                       {
-                      if (loggedIn) //TODO: inserisci il vero nome loggato
-                         return <Redirect to='/home/pattidegi'/>
+                      if (loggedIn) 
+                         return <Redirect to={'/home/' + user.username}/>
                          
                       if (surveysInfo.map(s=>s.surveyId).includes(parseInt(match.params.surveyId)))
                        { 
@@ -166,21 +194,28 @@ function App() {
 
                   <Route path='/home/:username/newSurvey' render={({match}) =>
                   { 
-                   /**TODO: check if the user is logged in or not*/
-                    return  <CreateNewSurvey adminUsername={match.params.username}
+                    if (loggedIn)
+                    return  <CreateNewSurvey adminUsername={user.username}
                                         insertNewSurvey={insertNewSurvey}/>
-                      }}>
                       
+                    else 
+                       return <Redirect to="/"/>  
+                      
+                  }  }>
                   </Route>
                       
                     <Route path='/home/:username' render={({match}) =>
-                  /**TODO: check if the user is logged in or not*/
-                      <AdminHome 
-                        adminUsername={match.params.username} 
-                        surveysInfo={surveysInfo.filter(s=> s.owner==match.params.username)} 
-                        surveysAnswers={surveysAnswers}
-                        surveyQuestions={surveysQuestions}>
-                      </AdminHome>
+                      { if (!loggedIn) 
+                          return <Redirect to='/'/>
+                       else
+                       { const adminSurveyId= surveysInfo.filter(s=> s.owner==user.username).map(s => s.surveyId);
+                          return <AdminHome 
+                                    adminUsername={user.username} 
+                                    surveysInfo={surveysInfo.filter(s=> s.owner==user.username)} //Only the surveyInfo of surveys owned by the admin
+                                    surveysAnswers={adminSurveysAnswers} 
+                                    surveyQuestions={surveysQuestions.filter(sq => adminSurveyId.includes(sq.surveyId)) //Only questions of the surveys owned by the admin
+                                    }>
+                                 </AdminHome>}}
                       }>
                   </Route>
                       
@@ -195,8 +230,8 @@ function App() {
   */}               
 
                   <Route path='/' render={() =>{
-                    if (loggedIn) //TODO: inserisci il vero nome loggato
-                      return <Redirect to='/home/pattidegi'/>
+                    if (loggedIn) 
+                      return <Redirect to={'/home/' + user.username}/>
                     else
                      return <MySurveysTable surveysInfo={surveysInfo}></MySurveysTable>
                   }}>

@@ -11,6 +11,7 @@ function CreateNewSurvey(props) {
     const [title, setTitle] = useState("");
     const [errTitle, setErrTitle] =useState(false);
     const [errNumQuestion, setErrNumQuestion] =useState(false);
+    const [errMessage, setErrMessage] =useState("");
 
     const [questions, setQuestions] = useState([]);
 
@@ -18,6 +19,7 @@ function CreateNewSurvey(props) {
 
     const handleAddQuestion = (question) => {
         if (errNumQuestion) setErrNumQuestion(false)
+        setErrMessage("")
         console.log("quesion added");
         /**TODO: aggiornare l'id del survey */
         question.questionId = questions.length;
@@ -35,7 +37,7 @@ function CreateNewSurvey(props) {
     }
     const handleQuestionMoveDown = (index) =>
     {
-        //The question down need to go up and the question at index need to down at sQind-1
+        //The question down need to go up and the question at position [index] need to down at sQind-1
         const data=[...questions];
         data[index].questionId = index+1;
         data[index+1].questionId = index; 
@@ -58,18 +60,23 @@ function CreateNewSurvey(props) {
     {
         setTitle(event.target.value)
         setErrTitle(event.target.value.trim().length==0)
+        setErrMessage("");
     }
     const handleSubmitNewSurvey =(event) =>{
         event.preventDefault();
         //Check that the title has been inserted and that there is at least one question inserted
-        if (errTitle) return;
+        if (errTitle) {
+            setErrMessage("Can not submit until there are errors in the form")
+            return;}
         if (title.trim().length==0) 
-            {
+            {   setErrMessage("Can not submit until there are errors in the form")
                 setErrTitle(true);
                 return;
             }
         if (questions.length<1)
-         {setErrNumQuestion(true)
+         {
+             setErrNumQuestion(true)
+             setErrMessage("Can not submit until there are errors in the form")
          return;}
         
         //All good here, submit the survey
@@ -112,7 +119,7 @@ function CreateNewSurvey(props) {
                     })}
 
                 <Row>
-                    <AddQuestionButtonModal submitQuestion={handleAddQuestion} />
+                    <AddQuestionModal submitQuestion={handleAddQuestion} />
                 </Row>
 
             </Card.Body>
@@ -122,6 +129,7 @@ function CreateNewSurvey(props) {
                 <Button variant="info"  className="btn btn-success btn-lg " onClick={handleSubmitNewSurvey} >
                     Submit the survey
                 </Button>
+                {errMessage.length!=0? <Alert variant="danger">{errMessage}</Alert> : <></>}
                 {/**TODO ADD a discard buytton?? */}
 
 
@@ -164,7 +172,7 @@ function QuestionRow(props)
                         </>
 }
 
-function AddQuestionButtonModal(props) {
+function AddQuestionModal(props) {
     const [show, setShow] = useState(false)
     const [questionText, setQuestionText] = useState(" ");
     const [numAnswers, setNumAnswers] = useState("1");
@@ -175,8 +183,22 @@ function AddQuestionButtonModal(props) {
     const [possibleAnswers, setPossibleAnswers] = useState([""]); //already inserted the first (mandatory) possible answer
     const [errText, setErrText] = useState(false);
     const [errPossibleAnswers, setErrPossibleAnswers] = useState([true]) //already inserted the value for the first answer
+    const [errMessage, setErrMessage] = useState("")
 
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setShow(false);
+        //reset everything
+        setQuestionText(" ");
+        setNumAnswers("1");
+        setMax("0");
+        setMin("0");
+        setChiusa(false);
+        setObbligatoria(false);
+        setPossibleAnswers([""]);
+        setErrText(false)
+        setErrPossibleAnswers([true]);
+        setErrMessage("");
+    }
     const handleShow = () => setShow(true);
 
     const handleChooseTypeOfQuestion = (event) => {
@@ -190,6 +212,7 @@ function AddQuestionButtonModal(props) {
         event.preventDefault();
         const newValue = parseInt(event.target.value)
         setNumAnswers(newValue);
+        setErrMessage("");
 
 
         if (newValue > 10 || newValue < 1) //Error: numAnswers not valid 
@@ -242,6 +265,7 @@ function AddQuestionButtonModal(props) {
         }
         setPossibleAnswers(data);
         setErrPossibleAnswers(err);
+        setErrMessage("");
     }
 
     const handleSubmit = (event) => {
@@ -249,25 +273,24 @@ function AddQuestionButtonModal(props) {
         //check errors
 
         if ((numAnswers > 10) || (numAnswers < 1) || (max > numAnswers) || (max < min) || (min < 0)) //One or more fields invalid
-        {
-            console.log("errori nei tre cammpi")
+        {   setErrMessage("Can not add the question until there are errors in the form")
             return;
         }
         if (questionText.trim().length == 0) //Text of the question missing
-        {
+        {   setErrMessage("Can not add the question until there are errors in the form")
             setErrText(true);
             return;
         }
 
         if (chiusa && errPossibleAnswers.filter(err => err == true).length != 0) //one of the answers has not been filled in
-        {
+        {   setErrMessage("Can not add the question until there are errors in the form")
             return
         }
 
 
         //Question format: { questionId: , surveyId:, chiusa: , min:, max:, obbligatoria:, question: , answers: },
         //surveyId and questionId will be set from the component above.
-        const newQuestion = { questionId: -1, surveyId: -1, chiusa: chiusa, min: min, max: max, obbligatoria: obbligatoria, question: questionText, answers: possibleAnswers.join("_") }
+        const newQuestion = { questionId: -1, surveyId: -1, chiusa: (chiusa? 1 : 0), min: min, max: max, obbligatoria: (obbligatoria? 1:0), question: questionText, answers: possibleAnswers.join("_") }
         props.submitQuestion(newQuestion);
         handleClose();
     }
@@ -278,6 +301,7 @@ function AddQuestionButtonModal(props) {
             setErrText(true)
         if (errText && event.target.value.trim().length != 0)
             setErrText(false)
+        setErrMessage("");
     }
 
 
@@ -442,6 +466,7 @@ function AddQuestionButtonModal(props) {
                         </>
 
                 }
+                {errMessage.length!=0? <Alert variant="danger">{errMessage}</Alert> : <></>}
 
             </Modal.Body>
 
