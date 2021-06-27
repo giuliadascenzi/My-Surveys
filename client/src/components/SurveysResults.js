@@ -11,6 +11,8 @@ import { ClosedQuestion } from './ClosedQuestion.js';
  * surveyQuestions
  * surveysAnswers
  */
+
+//Modal showing a filled survey (seen in a readOnly way) + arrows to go  back and forth 
 function SurveysResults(props)
 {
     const [show, setShow] = useState(false);
@@ -18,45 +20,54 @@ function SurveysResults(props)
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    //go to the next filled survey if its possible
     const nextSurvey = () => {if (index+1 < props.surveyAnswers.length) setIndex(index+1)}
+    //go to the previous filled survey if its possible
     const lastSurvey = () => {if (index-1 >= 0) setIndex(index-1)}
   
     return (
-      <>
+      <> {/** Button to check the results */}
         <CheckResultButton handleShow={handleShow}/>
         
         <Modal size="lg" show={show} onHide={handleClose}>
+
           <Modal.Header closeButton className="text-center">
             <Modal.Title className="font-weight-bold">"{props.surveyInfo.title}"</Modal.Title>
           </Modal.Header>
+
           <Modal.Body>
+             {/** In the body of the modal are shown the filled survey selected using the arrows. */}
               <OneSurveyResult
                 surveyQuestions={props.surveyQuestions}
-                surveyAnswers = {props.surveyAnswers[index]}
-               
+                surveyAnswers = {props.surveyAnswers[index]}    
               />
-
           </Modal.Body>
+
           <Modal.Footer>
-            <Button variant="outline-secondary" onClick={lastSurvey} disabled={index==0}>
+            {/** Go ahead arrow*/}
+            <Button variant="outline-secondary" onClick={lastSurvey} disabled={index===0}>
                   <AiOutlineArrowLeft
                     size="20"
                     fill="black"
                   />
             </Button>
-            <Button variant="outline-secondary" onClick={nextSurvey} disabled={index==props.surveyAnswers.length-1}>
+            {/** Go back arrow */}
+            <Button variant="outline-secondary" onClick={nextSurvey} disabled={index===props.surveyAnswers.length-1}>
                 <AiOutlineArrowRight
                     size="20"
                     fill="black"
                   />
             </Button>
           </Modal.Footer>
+
         </Modal>
       </>
     );
   }
-      
-      /*Clicking on this button the user gets redirect to the page where he/she can fill in the selected survey*/
+ 
+  
+/*Clicking on this button the user gets redirected to the page where he/she can fill in the selected survey*/
 function CheckResultButton(props)
 {
     return <Button variant="outline-custom" onClick={props.handleShow}>
@@ -67,12 +78,14 @@ function CheckResultButton(props)
               </Button>
 }  
 
+
+//Shows one filled survey
 function OneSurveyResult(props)
-{  const answers = JSON.parse(props.surveyAnswers.answers);
+{  
+  const answers = JSON.parse(props.surveyAnswers.answers); //Because in the db the answers are saved as a JSON array
     return <Card>
 
-            <Card.Body>
-                
+            <Card.Body> 
                 <Form >
                     <Form.Group as={Row} controlId="surveyForm" >
                         {/* Input label for the user name*/}
@@ -87,24 +100,24 @@ function OneSurveyResult(props)
                                             .map((sQ, sQind) => {   
                                                                     if (sQ.chiusa === 1) /* closed Question */
                                                                         return <Container fluid id="questionRow" key={sQ.questionId}>
-                                                                            <ClosedQuestion
-                                                                                surveyQuestion={sQ}
-                                                                                key={sQ.questionId}
-                                                                                questionIndex={sQind } 
-                                                                                answer = {answers[sQind]}
-                                                                                /></Container>
+                                                                                <ClosedQuestion
+                                                                                    surveyQuestion={sQ}
+                                                                                    key={sQ.questionId}
+                                                                                    questionIndex={sQind } 
+                                                                                    answer = {answers[sQind]}
+                                                                                    />
+                                                                                </Container>
                                                                     else                /* open Question */
                                                                         return <Container fluid id="questionRow" key={sQ.questionId}>
-                                                                            <OpenQuestion 
-                                                                              surveyQuestion={sQ}
-                                                                              key={sQ.questionId}
-                                                                              questionIndex={sQind} 
-                                                                              answer = {answers[sQind]}
-                                                                        
-                                                                            /></Container>
+                                                                                  <OpenQuestion 
+                                                                                    surveyQuestion={sQ}
+                                                                                    key={sQ.questionId}
+                                                                                    questionIndex={sQind} 
+                                                                                    answer = {answers[sQind]}
+                                                                                  />
+                                                                            </Container>
                                                                 })}
 
-                    
 
                 </Form>
             </Card.Body>

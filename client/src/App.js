@@ -13,38 +13,26 @@ import { Toast } from "react-bootstrap";
 
 
 /*
+FORMAT of the DATA
 
-// Static data 
-const sInfo = [{ surveyId: 0, title: "Abitudini culinarie tra gli studenti italiani", owner: "pattidegi", date:dayjs("2021-05-02T09:00:00.000Z") },
-{ surveyId: 1, title: "Quanto ne sai sulla raccolta differenziata?", owner: "giuliadash", date:dayjs("2021-06-02T09:00:00.000Z") },
-{ surveyId: 2, title: "Come ha modificato la tua vita la pandemia?", owner: "giuliadash", date:dayjs("2021-06-02T09:00:00.000Z") }
-];
-//Keys: questionId,surveyId
-const sQuestions= [{ questionId: 0, surveyId:0,  chiusa: 1, min:1, max:1, obbligatoria:-1, question: "Quanti anni hai?", answers: "0-10_11-20_21-30_31-40_41+" },
-{ questionId: 1, surveyId:0, chiusa: 1, min:1, max:1, obbligatoria:-1, question: "Nazionalità?", answers: "Italia_Spagna_Francia_Norvegia_Altro" },
-{ questionId: 3, surveyId:0, chiusa: 1, min:2, max:3, obbligatoria:-1, question: "Top 3 dei tuoi piatti preferiti", answers: "Lasagna_Pizza_Sushi_Hamburger_Frittata_Paella" },
+   * surveysInfo = array of { surveyId, title, owner, date }
 
-{ questionId: 2, surveyId:0, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che cosa studi?", answers: "" },
-{ questionId: 0, surveyId:1, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Che lavoro fai?", answers: "" },
-{ questionId: 0, surveyId:2, chiusa: 0, min:-1, max:-1, obbligatoria:1, question: "Come ha modificato la tua vita?", answers: "" }
+   * surveysQuestion = array of { surveyId, questionId, chiusa, min, max, obbligatoria, question, answers} 
+     (where answers are the possible answers, in case of closed question, concatenated by "_")
 
-];
-const sAnswers=[{answers: ["1", "1", "ingegneria informatica", "0"], surveyId: 0, user: "giulia"},
-{ answers: ["2", "3", "economia", "0_1_2"], surveyId: 0, user: "nik"},
-{ answers: ["studio"], surveyId: 1, user: "nik"},
-{ answers: ["veterinaria"], surveyId: 1, user: "giusj"},
-{ answers: ["male"], surveyId: 2, user: "giusj"},
-{ answers: ["non bene"], surveyId: 2, user: "giulia"},
- ];
+   * adminSurveyAnswers = array of {surveyId, user, answers}
+     (where answers is an array of answers -one for each question of the survey-)
+
 */
 
 function App() {
-  const [surveysInfo, setSurveysInfo] = useState([]);
-  const [surveysQuestions, setSurveysQuestions] = useState([]);
-  const [adminSurveysAnswers, setAdminSurveysAnswers] = useState([]);
+
+  const [surveysInfo, setSurveysInfo] = useState([]); //Information about the surveys
+  const [surveysQuestions, setSurveysQuestions] = useState([]); //Questions of each survey
+  const [adminSurveysAnswers, setAdminSurveysAnswers] = useState([]); //Answers given by users to the surveys owned by the logged in admin.
   const [loggedIn, setLoggedIn] = useState(false); // at the beginning, no user is logged in
   const [dirty, setDirty] = useState(true);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); //Admin
   const [message, setMessage] = useState('');
 
   // check if user is authenticated
@@ -62,6 +50,7 @@ function App() {
     checkAuth();
   }, []);
 
+  //rehydrate the local data (every time a user logs in/out, create a survey or fill in a survey)
   useEffect(() => {
 
     const getSurveysInfo = async () => {
@@ -85,12 +74,11 @@ function App() {
       getSurveysInfo()
         .then(getSurveysQuestions)
         .then(getSurveysAnswers)
-        .catch(err => {
-          handleErrors(err);
-        })
-        .finally(() => setDirty(false));
+        .catch(err => handleErrors(err))
+        .finally(() => setDirty(false));  //In any cases set dirty to false at the end
 
   }, [dirty, loggedIn]);
+
 
   // show error message in toast
   const handleErrors = (err) => {
@@ -104,11 +92,9 @@ function App() {
   */
   const addFilledSurvey = async (surveyId, answers, user) => {
 
-
-    const FilledSurvey = { surveyId: surveyId, answers: answers, user: user };
-
+    const filledSurvey = { surveyId: surveyId, answers: answers, user: user };
     try {
-      await API.addFilledSurvey(FilledSurvey)
+      await API.addFilledSurvey(filledSurvey)
       setDirty(true) //Setting dirty to true it triggers the rehydrating process
     }
     catch (err) {
@@ -117,9 +103,12 @@ function App() {
 
   }
 
-  /*
-  * Function to add a new survey in the local data and in the db.
-  */
+  /**
+   * Function to add a new survey in the local data and in the db.
+   * @param {*} title title of the survey, string
+   * @param {*} questions array of question in the format { surveyId, questionId, chiusa, min, max, obbligatoria, question, answers}
+   * @param {*} owner owner of the survey (must be the admin logged in)
+   */
   const insertNewSurvey = async (title, questions, owner) => {
 
     try {
@@ -130,11 +119,12 @@ function App() {
       throw err; //The error is managed in the New Survey form
     }
 
-
-
-
   }
 
+  /**
+   * Function to login
+   * @param {*} credentials  username, password
+   */
   const doLogIn = async (credentials) => {
     try {
       const user = await API.logIn(credentials);
@@ -148,6 +138,10 @@ function App() {
     }
   }
 
+
+  /**
+   * Function to log out
+   */
   const doLogOut = async () => {
     await API.logOut()
     // clean up everything
@@ -163,35 +157,44 @@ function App() {
   return (<>
 
     <Router>
-      <title>My Online Surveys</title>
-      <MyNavbar loggedIn={loggedIn} doLogOut={doLogOut} doLogIn={doLogIn} />
 
+      {/**Title */}
+      <title>My Online Surveys</title>
+      
+      {/**Navbar */}
+      <MyNavbar loggedIn={loggedIn} doLogOut={doLogOut} doLogIn={doLogIn} />
+      
+      {/**Toast with error messages if set */}
       <Toast show={message !== ''} onClose={() => setMessage('')} delay={3000} autohide>
         <Toast.Body>{message?.msg}</Toast.Body>
       </Toast>
+
+
       <Switch>
 
+        {/**Route to visulize a survey and fill it. Only user not logged in can access it */}
         <Route path='/survey/:surveyId' render={({ match }) => {
           if (loggedIn)
             return <Redirect to={'/home/' + user.username} />
 
           if (surveysInfo.map(s => s.surveyId).includes(parseInt(match.params.surveyId))) {
             return <FillInSurvey
-              surveyInfo={surveysInfo.filter(s => (s.surveyId == match.params.surveyId))[0]}
-              surveyQuestions={surveysQuestions.filter(s => (s.surveyId == match.params.surveyId))}
-              addFilledSurvey={addFilledSurvey}
-            ></FillInSurvey>
-          } else
+                    surveyInfo={surveysInfo.filter(s => (s.surveyId === parseInt(match.params.surveyId)))[0]} //Only the surveyInfo of the selected survey
+                    surveyQuestions={surveysQuestions.filter(s => (s.surveyId === parseInt(match.params.surveyId)))} //Only the questions of the selected survey
+                    addFilledSurvey={addFilledSurvey} //Function to submit the filled survey
+                  ></FillInSurvey>
+          } 
+          else
             return <>Survey Not Found </>
         }
         }>
-
         </Route>
 
-
+        {/**Route to access the page of the survey creation. Only logged in users can access it */}
         <Route path='/home/:username/newSurvey' render={() => {
           if (loggedIn)
-            return <CreateNewSurvey adminUsername={user.username}
+            return <CreateNewSurvey 
+              adminUsername={user.username} //username of the admin logged in
               insertNewSurvey={insertNewSurvey} />
 
           else
@@ -199,18 +202,19 @@ function App() {
 
         }}>
         </Route>
-
+       
+        {/**Route to access the home page of an admin. Only the admin after logging in can access it */}
         <Route path='/home/:username' render={() => {
           if (!loggedIn)
             return <Redirect to='/' />
           else {
-            const adminSurveyId = surveysInfo.filter(s => s.owner == user.username).map(s => s.surveyId);
+            const adminSurveyIds = surveysInfo.filter(s => s.owner === user.username).map(s => s.surveyId); //Ids of the surveys created by the admin
             return <AdminHome
               loading={dirty}
-              adminUsername={user.username}
-              surveysInfo={surveysInfo.filter(s => s.owner == user.username)} //Only the surveyInfo of surveys owned by the admin
-              surveysAnswers={adminSurveysAnswers}
-              surveyQuestions={surveysQuestions.filter(sq => adminSurveyId.includes(sq.surveyId)) //Only questions of the surveys owned by the admin
+              adminUsername={user.username} //Username of the admin logged in
+              surveysInfo={surveysInfo.filter(s => s.owner === user.username)} //Only the surveyInfo of surveys owned by the admin
+              surveysAnswers={adminSurveysAnswers} 
+              surveyQuestions={surveysQuestions.filter(sq => adminSurveyIds.includes(sq.surveyId)) //Only questions of the surveys owned by the admin
               }>
             </AdminHome>
           }
@@ -218,15 +222,15 @@ function App() {
         }>
         </Route>
 
-
+        {/**If the user is not logged in this route access the home page of a normal user, instead if the admin is logged in he/she is redirected to the admin home page */}
         <Route path='/' render={() => {
           if (loggedIn)
             return <Redirect to={'/home/' + user.username} />
           else
             return <MySurveysTable
-              surveysInfo={surveysInfo}
-              loading={dirty}>
-            </MySurveysTable>
+                      surveysInfo={surveysInfo}
+                      loading={dirty}>
+                  </MySurveysTable>
         }}>
         </Route>
 

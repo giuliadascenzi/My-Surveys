@@ -100,7 +100,7 @@ function LogInForm(props) {
             Invalid number of digits
           </Form.Control.Feedback>
         </Form.Group>
-        {errorMessage!="" ? <Alert  variant="danger"> {errorMessage} </Alert> : <></>}
+        {errorMessage!=="" ? <Alert  variant="danger"> {errorMessage} </Alert> : <></>}
         <Container fluid className="d-flex justify-content-center">
         <Button variant="custom" type="submit" form="log_in_form">Login</Button>
         </Container>

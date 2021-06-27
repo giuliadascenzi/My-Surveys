@@ -147,11 +147,12 @@ exports.checkAnswerValidity = (surveyId, questionId, answer) => {
                                                   let question= rows[0];
                                                   if (question.chiusa==1) //Closed question
                                                   {
+                                                    let opzionale= question.min===0;
                                                     let answers = answer.split("_"); //Format of the answer indexA_indexB_indexC 
                                                     if (answers.length< question.min || answers.length> question.max) return reject("One or more answer are not valid 151");
                                                     let validAnswers = [...Array(question.answers.split("_").length).keys()] //The valid answers are number in range (0, maxAnswers) because the answers are the indexes of the closed answers chosen.
                                                     
-                                                    if (answers.filter(a => !validAnswers.includes(parseInt(a))).length!=0) return reject("One or more answer are not valid 153");
+                                                    if (!opzionale && answers.filter(a => !validAnswers.includes(parseInt(a))).length!=0) return reject("One or more answer are not valid 153 " + answers +"|" +validAnswers );
                                                     resolve(true)
                                                   }
                                                   else

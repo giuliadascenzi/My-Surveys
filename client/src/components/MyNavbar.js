@@ -17,7 +17,7 @@ function MyNavbar(props) {
       <Nav className="col-3">
       <Container fluid className="justify-content-md-end">
         <Nav.Item >
-          {props.loggedIn? <MyLogOutButton logout={props.doLogOut}/> : <MyLogInButton login={props.doLogIn}/>}
+          {props.loggedIn? <MyLogOutButton logout={props.doLogOut}/> : <MyLogInButton login={props.doLogIn}/>} 
         </Nav.Item>
         </Container>
       </Nav>
