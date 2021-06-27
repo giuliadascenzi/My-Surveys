@@ -3,13 +3,13 @@ import MySurveysTable from './components/MySurveysTable.js'
 import FillInSurvey from './components/FillInSurvey.js'
 import AdminHome from './components/AdminHome.js'
 import CreateNewSurvey from './components/CreateNewSurvey.js'
-import {LogInForm, LogOutForm} from './components/LogForms.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css';
 import API from './API';
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import dayjs from 'dayjs'
+import { Toast } from "react-bootstrap";
 
 
 /*
@@ -39,101 +39,98 @@ const sAnswers=[{answers: ["1", "1", "ingegneria informatica", "0"], surveyId: 0
 */
 
 function App() {
-  const [surveysInfo, setSurveysInfo] =useState([]); 
-  const [surveysQuestions, setSurveysQuestions] =useState([]);
-  const [adminSurveysAnswers, setAdminSurveysAnswers] =useState([]);
+  const [surveysInfo, setSurveysInfo] = useState([]);
+  const [surveysQuestions, setSurveysQuestions] = useState([]);
+  const [adminSurveysAnswers, setAdminSurveysAnswers] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false); // at the beginning, no user is logged in
   const [dirty, setDirty] = useState(true);
-  const [showLogModal, setShowLogModal] = useState(false)
   const [user, setUser] = useState(null);
+  const [message, setMessage] = useState('');
 
   // check if user is authenticated
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // here you have the user info, if already logged in
+        // user info, if already logged in
         const user = await API.getUserInfo();
         setUser(user);
         setLoggedIn(true);
       } catch (err) {
-        console.log(err.error); // mostly unauthenticated user
+        console.log(err); // mostly unauthenticated user
       }
     };
     checkAuth();
   }, []);
-  
-  useEffect(()=> {
+
+  useEffect(() => {
+
     const getSurveysInfo = async () => {
-        const surveys = await API.getAllSurveysInfo();
-        setSurveysInfo(surveys);
-        setDirty(false);
+      const surveys = await API.getAllSurveysInfo();
+      setSurveysInfo(surveys);
     };
-    if(dirty)
-      getSurveysInfo()
-      .catch(err => {
-        //setMessage({msg: "Impossible to load your exams! Please, try again later...", type: 'danger'});
-        console.error(err);
-      });
-  }, [dirty, loggedIn]);
 
-  useEffect(()=> {
     const getSurveysQuestions = async () => {
-        const surveysQ = await API.getAllSurveysQuestions();
-        setSurveysQuestions(surveysQ);
-        setDirty(false);
-
+      const surveysQ = await API.getAllSurveysQuestions();
+      setSurveysQuestions(surveysQ);
     };
-    if(dirty)
-      getSurveysQuestions()
-      .catch(err => {
-        //setMessage({msg: "Impossible to load your exams! Please, try again later...", type: 'danger'});
-        console.error(err);
-      });
-  }, [dirty, loggedIn]);
 
-  useEffect(()=> {
     const getSurveysAnswers = async () => {
-      if(loggedIn) {
+      if (loggedIn) { //Only the answers of the admin's surveys are fetched so the admin must be logged in
         const surveysA = await API.getAdminSurveysAnswers();
         setAdminSurveysAnswers(surveysA);
-        setDirty(false);
       }
     };
-    if(dirty)
-      getSurveysAnswers()
-      .catch(err => {
-        //setMessage({msg: "Impossible to load your exams! Please, try again later...", type: 'danger'});
-        console.error(err);
-      });
+
+    if (dirty)
+      getSurveysInfo()
+        .then(getSurveysQuestions)
+        .then(getSurveysAnswers)
+        .catch(err => {
+          handleErrors(err);
+        })
+        .finally(() => setDirty(false));
+
   }, [dirty, loggedIn]);
-  
+
+  // show error message in toast
+  const handleErrors = (err) => {
+    setMessage({ msg: err.error, type: 'danger' });
+    console.log(err);
+  }
+
+
   /*
   * Function to add a new filled survey in the local data and in the db.
   */
-  const addFilledSurvey = (surveyId, answers, user) => {
-    /** function to add a new filled  survey. It's called submitting the fillSurvey */
-    console.log("[addFilledInSurvey]");
-    const FilledSurvey = {surveyId: surveyId, answers: answers, user:user, status:"added"}; //TODO: Gestire questa roba degli stati!
-    setAdminSurveysAnswers([...adminSurveysAnswers, FilledSurvey]); //TODO: se non è dell'amministratore non va fatto!!!
+  const addFilledSurvey = async (surveyId, answers, user) => {
 
-    API.addFilledSurvey(FilledSurvey)
-      .then(()=> setDirty(true))
-      .catch((err) => console.error(err));
+
+    const FilledSurvey = { surveyId: surveyId, answers: answers, user: user };
+
+    try {
+      await API.addFilledSurvey(FilledSurvey)
+      setDirty(true) //Setting dirty to true it triggers the rehydrating process
+    }
+    catch (err) {
+      throw err; //The error is managed in  the Fill In Survey form
+    }
 
   }
 
   /*
   * Function to add a new survey in the local data and in the db.
   */
-  const insertNewSurvey = (title, questions, owner) => {
-    /** function to add a new  survey. It's called submitting the NewSurvey */
-    console.log("[insertNewSurvey]");
-    //Insert in sInfo table format = { surveyId: , title: , owner: , date: }
-    API.addNewSurvey(title, owner, dayjs().format("YYYY-MM-DD"), questions)
-    .then(()=> setDirty(true))
-    .catch((err) => console.error(err));
-    //Insert all the questions in sQuestions, adding in each question the surveyId **TODO**
-    console.log(title,dayjs().format("YYYY-MM-DD"), questions, owner);
+  const insertNewSurvey = async (title, questions, owner) => {
+
+    try {
+      await API.addNewSurvey(title, owner, dayjs().format("YYYY-MM-DD"), questions);
+      setDirty(true) //Setting dirty to true it triggers the  rehydrating process
+    }
+    catch (err) {
+      throw err; //The error is managed in the New Survey form
+    }
+
+
 
 
   }
@@ -162,75 +159,81 @@ function App() {
     setDirty(true);
 
   }
-  
-  return ( <>
-        
-        <Router>
-            <title>My Online Surveys</title>
-            <MyNavbar loggedIn={loggedIn} doLogOut={doLogOut} doLogIn={doLogIn}/>
 
-                <Switch>
-                  
-                  <Route path='/survey/:surveyId' render={({match}) =>
-                      {
-                      if (loggedIn) 
-                         return <Redirect to={'/home/' + user.username}/>
-                         
-                      if (surveysInfo.map(s=>s.surveyId).includes(parseInt(match.params.surveyId)))
-                       { 
-                        return <FillInSurvey 
-                                    surveyInfo={surveysInfo.filter(s=>(s.surveyId==match.params.surveyId))[0]}
-                                    surveyQuestions={surveysQuestions.filter(s=>(s.surveyId==match.params.surveyId))}
-                                    addFilledSurvey = {addFilledSurvey}
-                               ></FillInSurvey>
-                      }else
-                          return <>Survey Not Found </>
-                      }  
-                    }>
-                      
-                  </Route>
+  return (<>
+
+    <Router>
+      <title>My Online Surveys</title>
+      <MyNavbar loggedIn={loggedIn} doLogOut={doLogOut} doLogIn={doLogIn} />
+
+      <Toast show={message !== ''} onClose={() => setMessage('')} delay={3000} autohide>
+        <Toast.Body>{message?.msg}</Toast.Body>
+      </Toast>
+      <Switch>
+
+        <Route path='/survey/:surveyId' render={({ match }) => {
+          if (loggedIn)
+            return <Redirect to={'/home/' + user.username} />
+
+          if (surveysInfo.map(s => s.surveyId).includes(parseInt(match.params.surveyId))) {
+            return <FillInSurvey
+              surveyInfo={surveysInfo.filter(s => (s.surveyId == match.params.surveyId))[0]}
+              surveyQuestions={surveysQuestions.filter(s => (s.surveyId == match.params.surveyId))}
+              addFilledSurvey={addFilledSurvey}
+            ></FillInSurvey>
+          } else
+            return <>Survey Not Found </>
+        }
+        }>
+
+        </Route>
 
 
-                  <Route path='/home/:username/newSurvey' render={() =>
-                  { 
-                    if (loggedIn)
-                    return  <CreateNewSurvey adminUsername={user.username}
-                                        insertNewSurvey={insertNewSurvey}/>
-                      
-                    else 
-                       return <Redirect to="/"/>  
-                      
-                  }  }>
-                  </Route>
-                      
-                    <Route path='/home/:username' render={() =>
-                      { if (!loggedIn) 
-                          return <Redirect to='/'/>
-                       else
-                       { const adminSurveyId= surveysInfo.filter(s=> s.owner==user.username).map(s => s.surveyId);
-                          return <AdminHome 
-                                    adminUsername={user.username} 
-                                    surveysInfo={surveysInfo.filter(s=> s.owner==user.username)} //Only the surveyInfo of surveys owned by the admin
-                                    surveysAnswers={adminSurveysAnswers} 
-                                    surveyQuestions={surveysQuestions.filter(sq => adminSurveyId.includes(sq.surveyId)) //Only questions of the surveys owned by the admin
-                                    }>
-                                 </AdminHome>}}
-                      }>
-                  </Route>
-                      
+        <Route path='/home/:username/newSurvey' render={() => {
+          if (loggedIn)
+            return <CreateNewSurvey adminUsername={user.username}
+              insertNewSurvey={insertNewSurvey} />
 
-                  <Route path='/' render={() =>{
-                    if (loggedIn) 
-                      return <Redirect to={'/home/' + user.username}/>
-                    else
-                     return <MySurveysTable surveysInfo={surveysInfo}></MySurveysTable>
-                  }}>
-                  </Route>
-              
-              </Switch>
-        </Router>
-    </>
-    );
+          else
+            return <Redirect to="/" />
+
+        }}>
+        </Route>
+
+        <Route path='/home/:username' render={() => {
+          if (!loggedIn)
+            return <Redirect to='/' />
+          else {
+            const adminSurveyId = surveysInfo.filter(s => s.owner == user.username).map(s => s.surveyId);
+            return <AdminHome
+              loading={dirty}
+              adminUsername={user.username}
+              surveysInfo={surveysInfo.filter(s => s.owner == user.username)} //Only the surveyInfo of surveys owned by the admin
+              surveysAnswers={adminSurveysAnswers}
+              surveyQuestions={surveysQuestions.filter(sq => adminSurveyId.includes(sq.surveyId)) //Only questions of the surveys owned by the admin
+              }>
+            </AdminHome>
+          }
+        }
+        }>
+        </Route>
+
+
+        <Route path='/' render={() => {
+          if (loggedIn)
+            return <Redirect to={'/home/' + user.username} />
+          else
+            return <MySurveysTable
+              surveysInfo={surveysInfo}
+              loading={dirty}>
+            </MySurveysTable>
+        }}>
+        </Route>
+
+      </Switch>
+    </Router>
+  </>
+  );
 }
 
 export default App;

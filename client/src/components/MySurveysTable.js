@@ -1,4 +1,4 @@
-import { Table, Row, Button, Container} from "react-bootstrap";
+import { Table, Row, Button, Container, Spinner} from "react-bootstrap";
 import { RiSurveyLine} from "react-icons/ri";
 import {  Link } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -21,12 +21,17 @@ function MySurveysTable(props) {
       </tr>
     </thead>
     <tbody id="table_body">
-      {
+      {!props.loading ?
         props.surveysInfo.map( s =>  <SurveyRow surveyInfo={s}
                                                 key={s.surveyId}/>)
-      }
+                                                : <></>}
     </tbody>
   </Table>
+  {props.loading ? <Container className="d-flex justify-content-center">
+                          {/*Loading spinner*/}
+                          <Spinner animation="border" role="status" variant="primary"></Spinner>
+                      </Container>
+                   : <></>}
 
   </>
 

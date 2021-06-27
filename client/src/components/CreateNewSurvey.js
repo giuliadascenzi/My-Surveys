@@ -22,8 +22,9 @@ function CreateNewSurvey(props) {
         if (errNumQuestion) setErrNumQuestion(false)
         setErrMessage("")
         console.log("quesion added");
-        /**TODO: aggiornare l'id del survey */
+        /**Insert the questionId (incremental) */
         question.questionId = questions.length;
+        // Instead the surveyId stays -1 because it is a temporaneous surveyId, when it will be inserted in the db, the db will assign it a real surveyId
         setQuestions([...questions, question]);
     }
 
@@ -77,9 +78,11 @@ function CreateNewSurvey(props) {
         }
 
         //All good here, submit the survey
-        props.insertNewSurvey(title, questions, props.adminUsername);
+        props.insertNewSurvey(title, questions, props.adminUsername)
+             .then(()=> history.goBack())
+             .catch( () => {setErrMessage("Sorry, it has not been possible to insert the survey. Try again later.") } );
+            
 
-        history.goBack()
     }
 
     return <Container id="survey_container">

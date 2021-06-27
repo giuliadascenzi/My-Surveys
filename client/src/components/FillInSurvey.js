@@ -54,9 +54,10 @@ function FillInSurvey(props) {
             }, 2000);
         } else {
             // submit the answers
-            props.addFilledSurvey(props.surveyInfo.surveyId, answers, user);
-            // redirect to the home page
-            history.push("/");
+            props.addFilledSurvey(props.surveyInfo.surveyId, answers, user)
+                 .then(()=> history.push("/")) // redirect to the home page
+                 .catch( () => {setErrMessage("Sorry, it has not been possible to submit your answers. Try again later.") } );
+
         }
 
     };
