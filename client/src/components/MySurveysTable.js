@@ -52,10 +52,10 @@ function MySurveysTable(props) {
 function SurveyRow(props) {
   return <>
     <tr>
-      <td>{props.surveyInfo.title}</td> {/** title of the survey */}
-      <td>{props.surveyInfo.owner}</td>  {/** owner of the survey */}
-      <td>{props.surveyInfo.date ? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY') : ""}</td> {/** data of creation of the survey */}
-      <td><MyFillInButton surveyId={props.surveyInfo.surveyId} /></td> {/** Button to press if the user wants to fill in that survey */}
+      <td>{props.surveyInfo.title}</td> 
+      <td>{props.surveyInfo.owner}</td> 
+      <td>{props.surveyInfo.date ? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY') : ""}</td> 
+      <td><MyFillInButton surveyId={props.surveyInfo.surveyId} /></td> 
     </tr>
   </>
 }

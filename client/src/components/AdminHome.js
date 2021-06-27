@@ -75,16 +75,15 @@ function ResultsRow(props) {
   
   return <>
     <tr>
-      <td>{props.surveyInfo.title}</td> {/**title of the survey */}
-      <td>{props.surveyInfo.date ? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY') : ""}</td> {/**data of the creation */}
+      <td>{props.surveyInfo.title}</td> 
+      <td>{props.surveyInfo.date ? dayjs(props.surveyInfo.date).format('dddd, MMMM D, YYYY') : ""}</td> 
       <td>{numAnswers}</td> 
       <td>{numAnswers > 0 ? //Show results only if there are any
                           <SurveysResults 
                             surveyQuestions={props.surveysQuestions.filter(s => s.surveyId === props.surveyInfo.surveyId)}
                             surveyAnswers={props.surveysAnswers.filter(s => s.surveyId === props.surveyInfo.surveyId)}
                             surveyInfo={props.surveyInfo} />
-                          : 
-                          <></>}
+                          : <></>}
       </td>
     </tr>
   </>
