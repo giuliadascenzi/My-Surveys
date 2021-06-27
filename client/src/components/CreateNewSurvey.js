@@ -1,8 +1,8 @@
-import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl, Alert, TabContainer } from "react-bootstrap";
+import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl, Alert } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { FaArrowUp, FaArrowDown } from "react-icons/fa";
-import { RiDeleteBin5Fill } from "react-icons/ri";
+import { FaArrowUp, FaArrowDown,FaPlus } from "react-icons/fa";
+import { RiDeleteBin5Fill,RiDownload2Fill } from "react-icons/ri";
 import { OpenQuestion } from './OpenQuestion.js';
 import { ClosedQuestion } from './ClosedQuestion.js';
 import { IoIosReturnLeft, IoIosWarning } from "react-icons/io";
@@ -123,21 +123,23 @@ function CreateNewSurvey(props) {
                         <AddQuestionModal submitQuestion={handleAddQuestion} />
                     </Row>
                 </Container>
-
             </Card.Body>
-        </Card>
-
-        <Container fluid id="new_Survey_footer">
-            
-                    {/* submit button */}
-                    <Button variant="custom" size="lg" onClick={handleSubmitNewSurvey} >
-                        Submit the survey
+       
+            <Card.Footer>  
+            <Container className="d-flex flex-column">
+            {errMessage.length != 0 ? <Alert variant="danger"><IoIosWarning fill="#920c19" size="30" className="mx-1"/>{errMessage}</Alert> : <></>}
+               </Container>
+                <Container className="d-flex justify-content-between">
+                <Button variant="secondary" size="lg" onClick={() => history.goBack()}>
+                    <IoIosReturnLeft/>Discard
+                </Button>
+                <Button variant="custom" size="lg" onClick={handleSubmitNewSurvey} >
+                       <RiDownload2Fill/> Submit the survey
                     </Button>
-                    {errMessage.length != 0 ? <IoIosWarning fill="red" size="40" className="mx-4"/> : <></>}
-                
-        </Container >
+                </Container>   
 
-
+        </Card.Footer>   
+        </Card>
 
 
     </Container >
@@ -313,8 +315,9 @@ function AddQuestionModal(props) {
 
 
     return <>
-        <Button variant="success" size="lg" onClick={handleShow}>
-            + Add question
+
+        <Button variant="success" size="md" className="my-2" onClick={handleShow}>
+           <FaPlus />  Add 
         </Button>
         <Modal size="lg" show={show} onHide={handleClose}>
             <Modal.Header closeButton>
@@ -472,17 +475,22 @@ function AddQuestionModal(props) {
                         </>
 
                 }
-                {errMessage.length != 0 ? <Alert  variant="danger">{errMessage}</Alert> : <></>}
+
 
             </Modal.Body>
 
             <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
+                <Container className="d-flex flex-column">
+            {errMessage.length != 0 ? <Alert variant="danger"><IoIosWarning fill="#920c19" size="30" className="mx-1"/>{errMessage}</Alert> : <></>}
+               </Container>
+                <Container className="d-flex justify-content-between">
+                <Button variant="secondary" size="lg"onClick={handleClose}>
                     Discard
                 </Button>
-                <Button variant="success" onClick={handleSubmit}>
+                <Button variant="success"  size="lg" onClick={handleSubmit}>
                     Add question
                 </Button>
+                </Container>
             </Modal.Footer>
         </Modal>
     </>

@@ -76,7 +76,7 @@ function OneSurveyResult(props)
                 <Form >
                     <Form.Group as={Row} controlId="surveyForm" >
                         {/* Input label for the user name*/}
-                        <Form.Label column sm="4" className="insertName">Write here your name:</Form.Label>
+                        <Form.Label column sm="4">Write here your name:</Form.Label>
                         <Col sm="4">
                             <Form.Control type="username"  value={props.surveyAnswers.user? props.surveyAnswers.user : ""} readOnly/>
                         </Col>

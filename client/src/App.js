@@ -146,8 +146,7 @@ function App() {
       setDirty(true)
     }
     catch (err) {
-      // error is handled and visualized in the login form, do not manage error, throw it
-      // handleErrors(err)
+      // error is handled and visualized in the login form, so the error is not managed but only threw
       throw err;
     }
   }
@@ -192,7 +191,7 @@ function App() {
                   </Route>
 
 
-                  <Route path='/home/:username/newSurvey' render={({match}) =>
+                  <Route path='/home/:username/newSurvey' render={() =>
                   { 
                     if (loggedIn)
                     return  <CreateNewSurvey adminUsername={user.username}
@@ -204,7 +203,7 @@ function App() {
                   }  }>
                   </Route>
                       
-                    <Route path='/home/:username' render={({match}) =>
+                    <Route path='/home/:username' render={() =>
                       { if (!loggedIn) 
                           return <Redirect to='/'/>
                        else
@@ -219,15 +218,6 @@ function App() {
                       }>
                   </Route>
                       
-{/** 
-                  <Route path="/login" render={() =>
-                    loggedIn ? <Redirect to="/" /> : <LogInForm login={doLogIn}/>}>
-                   </Route>
-
-                  <Route path="/logout" render = {() =>
-                    loggedIn ? <LogOutForm logout={doLogOut} /> : <Redirect to="/" />}>
-                   </Route>
-  */}               
 
                   <Route path='/' render={() =>{
                     if (loggedIn) 
