@@ -154,18 +154,18 @@ exports.checkAnswerValidity = (surveyId, questionId, answer) => {
                                                     let opzionale= (question.min===0);
                                                     let answers = answer.split("_"); //Format of the answer indexA_indexB_indexC 
                                                     
-                                                    if (answers.length< question.min || answers.length> question.max) return reject("One or more answer are not valid 151");
+                                                    if (answers.length< question.min || answers.length> question.max) return reject("One or more answer are not valid");
                                                     
                                                     let validAnswers = [...Array(question.answers.split("_").length).keys()] //The valid answers are numbers in range (0, maxAnswers) because the answers are the indexes of the closed answers chosen.
                                                     
-                                                    if (!opzionale && answers.filter(a => !validAnswers.includes(parseInt(a))).length!=0) return reject("One or more answer are not valid 153 " + answers +"|" +validAnswers );
+                                                    if (!opzionale && answers.filter(a => !validAnswers.includes(parseInt(a))).length!=0) return reject("One or more answer are not valid " );
                                                     
                                                     resolve(true)
                                                   }
                                                   else
                                                   {
-                                                    if (question.obbligatoria==1 && answer.trim()=="") return reject("One or more answer are not valid 158");
-                                                    
+                                                    if (question.obbligatoria==1 && answer.trim()=="") return reject("One or more answer are not valid");
+                                                    if (answer.length> 200) return reject("One or more answer are not valid");
                                                     resolve(true)
                                                   }
                                                       
