@@ -1,4 +1,4 @@
-import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl, Alert } from "react-bootstrap";
+import { Form, Modal, Button, Card, Row, Col, Container, FormGroup, InputGroup, FormControl, Spinner, Alert } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FaArrowUp, FaArrowDown, FaPlus } from "react-icons/fa";
@@ -15,6 +15,7 @@ function CreateNewSurvey(props) {
     const [errNumQuestion, setErrNumQuestion] = useState(false); //If the admin want to submit a survey with no question
     const [errMessage, setErrMessage] = useState(""); //To notify errors
     const [questions, setQuestions] = useState([]); //Array with all the questions inserted
+    const [waiting, setWaiting] =useState(false); 
 
     let history = useHistory();
 
@@ -99,9 +100,13 @@ function CreateNewSurvey(props) {
         }
 
         //All good here, submit the survey
+        setWaiting(true); //waiting for the db
         props.insertNewSurvey(title, questions, props.adminUsername)
+            .then(()=> setWaiting(false)) 
             .then(() => history.goBack())
-            .catch(() => { setErrMessage("Sorry, it has not been possible to insert the survey. Try again later.") });
+            .catch(() => { 
+                setWaiting(false);
+                setErrMessage("Sorry, it has not been possible to insert the survey. Try again later.") });
 
 
     }
@@ -160,6 +165,8 @@ function CreateNewSurvey(props) {
                     <Button variant="secondary" size="lg" onClick={() => history.goBack()}>
                         <IoIosReturnLeft />Discard
                     </Button>
+                    {/** Waiting spinner */}
+                    {waiting? <Spinner animation="border" role="status" variant="primary"></Spinner> : <></>}
                     {/** Submit button */}
                     <Button variant="custom" size="lg" onClick={handleSubmitNewSurvey} >
                         <RiDownload2Fill /> Submit the survey
@@ -177,8 +184,10 @@ function CreateNewSurvey(props) {
  */
 function QuestionRow(props) {
     return <>
-        <Container fluid id="questionRow" key={props.sQind}><Row >
-            <Col sm="10">
+            <Row >
+            <Container className="d-flex justify-content-between" key={props.sQind} >
+            <Col sm={9}>
+            <Container  fluid id="questionRow">
                 {props.sQ.chiusa ? /* closed Question */
                     <ClosedQuestion
                         surveyQuestion={props.sQ}
@@ -191,9 +200,10 @@ function QuestionRow(props) {
                         key={"question" + props.sQind}
                         questionIndex={props.sQind}
                     />}
-
+              </Container>
             </Col>
             <Col id="bottoni" >
+              <Container className="d-flex justify-content-end">
                 {/** Up button */}
                 <Button key={"buttonUp" + props.sQind} variant="outline-secondary" disabled={props.sQind === 0} onClick={() => props.handleQuestionMoveUp(props.sQind)}>
                     <FaArrowUp fill="black" />
@@ -206,9 +216,10 @@ function QuestionRow(props) {
                 <Button key={"remove" + props.sQind} variant="outline-secondary" onClick={() => props.handleRemoveQuestion(props.sQind)}>
                     <RiDeleteBin5Fill fill="black" />
                 </Button>
+            </Container>
             </Col>
-        </Row>
-        </Container>
+      </Container>
+      </Row>
     </>
 }
 

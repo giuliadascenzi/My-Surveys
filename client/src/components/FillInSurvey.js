@@ -1,4 +1,4 @@
-import { Card, Form, Row, Col, Button, Alert, Container } from "react-bootstrap";
+import { Card, Form, Row, Col, Button, Alert, Container, Spinner } from "react-bootstrap";
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { OpenQuestion } from './OpenQuestion.js';
@@ -22,6 +22,7 @@ function FillInSurvey(props) {
     const [validated, setValidated] = useState(false);
     const [user, setUser] = useState(""); //Name of the user that is filling in the survey
     const [errMessage, setErrMessage] = useState("");
+    const [waiting, setWaiting] =useState(false);
 
     let history = useHistory();
 
@@ -67,9 +68,13 @@ function FillInSurvey(props) {
             }, 2000);
         } else {
             // submit the answers
+            setWaiting(true); //waiting for the db
             props.addFilledSurvey(props.surveyInfo.surveyId, answers, user)
+                .then(()=> setWaiting(false)) 
                 .then(() => history.push("/")) // redirect to the home page
-                .catch(() => { setErrMessage("Sorry, it has not been possible to submit your answers. Try again later.") });
+                .catch(() => { 
+                    setWaiting(false);
+                    setErrMessage("Sorry, it has not been possible to submit your answers. Try again later."); });
 
         }
 
@@ -134,6 +139,8 @@ function FillInSurvey(props) {
                         <Button variant="secondary" size="lg" onClick={() => history.goBack()}>
                             <IoIosReturnLeft />Discard
                         </Button>
+                        {/** Waiting spinner */}
+                        {waiting? <Spinner animation="border" role="status" variant="primary"></Spinner> : <></>}
                         {/* Submit button */}
                         <SubmitButton />
                     </Container>

@@ -24,6 +24,7 @@ exports.getAllSurveysInfo = () => {
     });
 };
 
+//get all the questions of all the surveys
 exports.getAllSurveysQuestions= () => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM S_QUESTIONS';
@@ -38,6 +39,7 @@ exports.getAllSurveysQuestions= () => {
     });
 };
 
+// get the answers of the surveys owned by the actual logged in admin
 exports.getAdminSurveysAnswers= (admin) => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT A.surveyId, A.user, A.answers FROM S_ANSWERS as A,S_INFO as I WHERE I.surveyId = A.surveyId AND I.owner=?';
@@ -71,6 +73,7 @@ exports.insertSInfo = (sInfo) => {
 exports.insertQuestions = (sQuestions, surveyId) => {
   return new Promise((resolve, reject) => {
     const sql = "INSERT INTO S_QUESTIONS(surveyId, questionId, chiusa, min, max, obbligatoria, question, answers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    
     db.serialize(()=>{
       for (let i=0; i<sQuestions.length; i++)
           db.run(sql, [surveyId, i, sQuestions[i].chiusa, sQuestions[i].min, sQuestions[i].max, sQuestions[i].obbligatoria,sQuestions[i].question,sQuestions[i].answers], function (err) 
@@ -82,12 +85,11 @@ exports.insertQuestions = (sQuestions, surveyId) => {
           }
           );
 
-          resolve(true); //TODO: senza funziona comunque?? CON se c'è un errore in uno dei run da errore? lo devo controllare o non importa??
-  })
+          resolve(true); })
   });
 };
 
-
+//Check if the survey of the given surveyId exists in the database
 exports.checkSurveyIdExists = (surveyId) => {
 
   return new Promise((resolve, reject) => {
@@ -110,6 +112,7 @@ exports.checkSurveyIdExists = (surveyId) => {
     });
 };
 
+//checks if the numbers of answers given by the user is the same of the number of question in the survey (must be the same)
 exports.checkNumberOfAnswers = (surveyId, numOfAnswers) => {
 
   return new Promise((resolve, reject) => {
@@ -132,6 +135,7 @@ exports.checkNumberOfAnswers = (surveyId, numOfAnswers) => {
     });
 };
 
+//For each answer get its question and the related constraints and check that every constraint is followed by the answer given
 exports.checkAnswerValidity = (surveyId, questionId, answer) => {
 
   return new Promise((resolve, reject) => {
@@ -147,17 +151,21 @@ exports.checkAnswerValidity = (surveyId, questionId, answer) => {
                                                   let question= rows[0];
                                                   if (question.chiusa==1) //Closed question
                                                   {
-                                                    let opzionale= question.min===0;
+                                                    let opzionale= (question.min===0);
                                                     let answers = answer.split("_"); //Format of the answer indexA_indexB_indexC 
+                                                    
                                                     if (answers.length< question.min || answers.length> question.max) return reject("One or more answer are not valid 151");
-                                                    let validAnswers = [...Array(question.answers.split("_").length).keys()] //The valid answers are number in range (0, maxAnswers) because the answers are the indexes of the closed answers chosen.
+                                                    
+                                                    let validAnswers = [...Array(question.answers.split("_").length).keys()] //The valid answers are numbers in range (0, maxAnswers) because the answers are the indexes of the closed answers chosen.
                                                     
                                                     if (!opzionale && answers.filter(a => !validAnswers.includes(parseInt(a))).length!=0) return reject("One or more answer are not valid 153 " + answers +"|" +validAnswers );
+                                                    
                                                     resolve(true)
                                                   }
                                                   else
                                                   {
                                                     if (question.obbligatoria==1 && answer.trim()=="") return reject("One or more answer are not valid 158");
+                                                    
                                                     resolve(true)
                                                   }
                                                       
@@ -165,18 +173,13 @@ exports.checkAnswerValidity = (surveyId, questionId, answer) => {
 
     });
 };
-//insert answers (filled in survey)
+
+//insert answers (filled survey)
 exports.insertAnswers = (surveyId, user, answers)=> {
 
   return new Promise((resolve, reject) => {
-    /** I must change the answers format in the accepted format: ["ans1", "ans2", "ans3"] */
-    let ans = "[";
-    for (let i=0; i< answers.length-1; i++)
-         ans = ans + '"'+answers[i]+'",';
-    ans= ans + '"'+answers[answers.length-1]+'"]';
-
     const sql = "INSERT INTO S_ANSWERS(surveyId, user, answers) VALUES (?, ?, ?)";
-    db.run(sql, [surveyId, user, ans], function (err) {
+    db.run(sql, [surveyId, user, JSON.stringify(answers)], function (err) {
       if (err) {
         reject(err);
         return;

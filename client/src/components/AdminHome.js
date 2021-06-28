@@ -96,7 +96,7 @@ function CreateNewSurveyButton(props) {
   return <Container fluid className="justify-content-start p-0">
     <Row className="py-4">
       <Col sm={3} >
-        <h6 > Click here if you want to create a new survey: </h6>
+        <h6 > To create a new survey: </h6>
       </Col>
       <Col >
         <Link to={props.adminUsername + "/NewSurvey"}>

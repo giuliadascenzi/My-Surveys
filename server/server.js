@@ -53,10 +53,7 @@ passport.deserializeUser((id, done) => {
     });
 });
 
-const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
-  // Format express-validate errors as strings
-  return `${location}[${param}]: ${msg}`;
-};
+
 
 
 // custom middleware: check if a given request is coming from an authenticated user
@@ -81,8 +78,6 @@ app.use(passport.session());
 
 
 /*** APIs ***/
-
-app.get("/", (req, res) => res.send("Welcome in the OnlineSurveys site"));
 
 
 // GET /api/surveysInfo
@@ -148,7 +143,7 @@ app.post('/api/survey', isLoggedIn,
     if (!errors.isEmpty())
       return res.status(400).json({ error: 'Bad Request', description: 'Invalid parameters', errors: errors.array() })
 
-    if (req.user.username != req.body.owner)
+    if (req.user.username != req.body.owner) //The owner of the survey must be the logged in user!
       return res.status(400).json({ error: 'Bad Request', description: 'The owner of the survey is not logged in'})
 
     const sInfo = { //No Id, because is set automatically by the db.
