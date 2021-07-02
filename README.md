@@ -151,7 +151,11 @@ On every row are shown the information of a survey and there is a `MyFillInButto
 
 ## Screenshot
 
+![Screenshot](./img/home.png)
+![Screenshot](./img/survey2.png)
+![Screenshot](./img/adminhome.png)
 ![Screenshot](./img/newSurveyScreenshot.png)
+![Screenshot](./img/visualizza.png)
 
 ## Users Credentials
 
